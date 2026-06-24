@@ -157,7 +157,30 @@ is OPEN. No saving is claimed without a `tokcost.py` number; no symbol ships wit
 - **Open:** read-accuracy on large/multi-table/ambiguous data; a TOON encoder edge cases; the RUNTIME
   that actually applies all this (the separate harness concept); P4 skillstone (one-paste ORDO.md).
 
-## Next: P4 / harness
+## P4 — the skillstone (`ORDO.md`), validated (2026-06-24)
+- **What:** `ORDO.md` — one self-contained paste-in file that teaches any LLM the whole stack
+  (directives + grammar + phrase glyphs + decode rules + the output framework) in one shot. README
+  rewired to make it the entrypoint.
+- **How:** distilled `lexicon.md` + `grammar.md` + `output.md` into a single lean spec; measured its
+  cost; re-ran the zero-shot decode test giving 3 fresh agents ONLY this file.
+- **Checked/verified (measured):**
+  - **Cost: 1,917 tokens** for the complete language + output framework. Paid once (cacheable); the
+    output-verbosity savings amortize it in a handful of responses.
+  - **Single-file decode = 1.75/2 mean (105/120), 14/20 fully faithful — EDGES PAST the 3-file run's
+    1.70.** Consolidating to one file improved fidelity, didn't cost it. D1/D3 agreed 19/20.
+  - Only 1 genuine decode error in 60 (a decoder flipped ×remove vs 据preserve); the rest are
+    encoding-ceiling losses transmitted CONSISTENTLY by all 3 decoders (the file teaches consistent
+    decoding). Fixed the one soft spot: pinned `×` vs `据` as opposites with a worked example (judge
+    predicted → ~1.85+).
+- **Open:** re-validate the × / 据 fix on a future run; per-target-model decode (tested on the workflow
+  model); the RUNTIME/harness that auto-applies ORDO (the separate second concept).
+
+## The language is done (P0-P4). Next: the harness (separate concept)
+P0 alphabet → P1.x pool/matrix/allocation → P2 grammar (ORDO-G, ~35%, decode 1.70) → P3 output
+framework (format-by-shape + ponytail 77% + caveman) → P4 skillstone (`ORDO.md`, 1.75/2). The LANGUAGE
+is built and measured end-to-end. The remaining piece is the **harness**: a runtime that auto-encodes
+requests / auto-decodes ORDO / enforces the output contract, instead of relying on the model following
+`ORDO.md` by hand. That is the separate second concept the project was always two-of.
 P3 = the skillstone (a single self-contained `ORDO.md` a user pastes into any LLM to teach it ORDO in
 one shot) + writing-system polish. Then the separate **harness** concept (the runtime that
 auto-encodes/decodes + the verbosity layer). The language itself (P0-P2) is now real and measured.

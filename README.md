@@ -38,19 +38,34 @@ and the honest corrections).
 4. **Epistemic + brevity are native grammar.** A mandatory certainty/evidence slot (kills confident
    hallucination) and a brevity/format slot (terseness is structural, not a request).
 
-## Status
-Experimental research. Building phase by phase: the alphabet (directive glyphs) -> the grammar ->
-the writing system + skillstone -> validation. Read `docs/method.md` and `DISCLAIMERS.md` first.
-Nothing here claims a magic compression multiplier; it claims a measured, lossless, grammar-driven
-reduction on the operational/command layer. The numbers will be measured, not promised.
+## Status — built and measured (P0-P4 done)
+The language is real. Every number below was measured, not promised (`docs/BUILD-LOG.md` logs what was
+checked per phase):
+- **Alphabet** (`spec/lexicon.md`): 28 directive glyphs, each 1 token; plus a 1,674-glyph measured pool.
+- **Grammar** (`spec/grammar.md`, ORDO-G): determinative type-tags, no whitespace. Cuts 20 real prompts
+  **~35%** (benchmark 32→11 tokens, 66%), both tokenizers. **Decode-tested 1.70/2** by 3 independent
+  agents reading only the spec.
+- **Output framework** (`spec/output.md`): format-by-shape (tabular→TSV ~55% off JSON; never
+  pretty-print) + verbosity (ponytail cuts a chatty answer **77%, lossless**; caveman 68% on
+  operational text). The biggest lever.
+- **Skillstone** (`ORDO.md`): one ~1.9k-token file that teaches any LLM the whole stack in one paste.
+
+No magic multiplier is claimed — a measured, lossless, grammar-driven reduction on the command +
+output layers. Read `DISCLAIMERS.md` for the honest caveats (GPT-tokenizer proxies, private-use only).
 
 ## Layout
+- `ORDO.md` — **the skillstone: paste this into any LLM to teach it ORDO.** Start here to use it.
 - `DISCLAIMERS.md` — what ORDO is and is not; the honest caveats.
-- `docs/method.md` — research lineage, design method, build phases, the corrections.
-- `spec/` — the language: the alphabet (`lexicon.md`), the grammar, the writing system, the skillstone.
-- `examples/` — worked English <-> ORDO translations.
-- `tools/` — the measurement + round-trip tooling that keeps the language honest.
+- `docs/method.md` — research lineage + design method. `docs/BUILD-LOG.md` — per-phase what/how/verified.
+- `spec/` — the language: `lexicon.md` (alphabet), `grammar.md` (ORDO-G), `output.md` (the framework),
+  `compression-map.md` + `master-map.*` (the vocabulary layer + its honest ~1-5% ceiling).
+- `tests/` — the benchmark prompts + their ORDO encodings + verification corpora.
+- `tools/` — the measurement tooling that keeps it honest: `tokcost`, `glyphpool`, `freqmatrix`,
+  `allocate`, `formatbench`.
 
-## Use (once the spec lands)
-Load the ORDO skillstone (a compact system-prompt spec) into any frontier LLM; it then reads and
-writes ORDO. Plug-in instructions: `spec/skillstone.md` (coming in a later phase).
+## Use
+1. Paste `ORDO.md` into any frontier LLM (system prompt or first message). It now reads and writes ORDO.
+2. Send terse commands: `σ文3列简` = "summarize the following in 3 concise bullets". The model expands
+   and executes. Its output follows the format + verbosity rules automatically.
+3. Token savings depend on the model's tokenizer (optimized on GPT proxies; re-validate on yours). The
+   spec is paid once (cache it); the output-verbosity savings amortize it in a handful of responses.
