@@ -1,0 +1,20 @@
+Summarize the following article in three concise bullet points, focus on the financial figures, write for a non-expert, and don't include any preamble.
+Refactor the code below to remove the duplication, keep the behavior identical, and add type hints where they are missing.
+Explain how a transformer model works, step by step, to someone who knows basic programming but no machine learning.
+Translate the paragraph below into formal French, preserve the technical terms, and keep the same paragraph structure.
+Compare React and Vue for a small team building a dashboard, in a table, weighing learning curve, ecosystem, and performance.
+Find and fix the bug in this function, explain what was wrong in one sentence, and don't change the public interface.
+Write a professional but friendly email declining the meeting and proposing two alternative times next week.
+Rate this essay from 1 to 10 on clarity, structure, and argument, and give one concrete improvement for each.
+Extract every date, person, and dollar amount from the transcript below and return them as a JSON array.
+Make a step by step plan to migrate this service from a monolith to microservices, and flag the riskiest step.
+Rewrite this README introduction to be more concise and confident, keep it under 80 words, no marketing fluff.
+Generate five distinct names for a budgeting app aimed at students, short and memorable, and avoid anything generic.
+Review this pull request for security issues only, point to the exact lines, and rank them by severity.
+Turn the following bullet notes into a coherent two-paragraph summary written in plain English.
+Explain the difference between authentication and authorization with a concrete example for each.
+Critique my business plan below, be brutally honest, focus on the weakest assumption, and suggest how to test it.
+Convert this Python function to TypeScript, keep the same names, and add JSDoc comments for each parameter.
+Give me the three most likely causes of this error message and how to check each one, ordered by probability.
+Shorten this support reply to under three sentences while keeping it warm and apologetic.
+Outline a 20 minute conference talk on prompt engineering for a technical audience, with timings per section.

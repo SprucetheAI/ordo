@@ -106,8 +106,37 @@ is OPEN. No saving is claimed without a `tokcost.py` number; no symbol ships wit
   freqs estimated (verification is real); sentence-level savings with the directive grammar stacked =
   measured in P2/P4.
 
-## Next: P2 — the grammar
-Operand type-tags (text/file/code/list determinatives), the modifier set (brevity/length/format/
-tone), the mandatory epistemic slot (certainty + source), directive chaining (pipe), and the
-deterministic parse rules. Then P3 (writing system + skillstone) and P4 (round-trip + measured
-sentence-level savings).
+## P2 — the grammar (ORDO-G), designed + decode-tested (2026-06-24)
+- **What:** `spec/grammar.md` (the determinative structure layer), `tests/prompts-benchmark.txt` (20
+  real verbose prompts) + `tests/prompts-ordo.txt` (their ORDO encodings).
+- **How:** a 4-way divergent design panel (positional / determinative / RPN / hybrid) scored by 3
+  adversarial judges on compression + zero-shot decodability + parse-determinism (the first two
+  weighted 2x). The **determinative grammar won (8.0)** — silent type-tags make word order free and
+  parsing unambiguous; whitespace is banned (it costs a token). Then an empirical **zero-shot decode
+  test**: 3 fresh agents read the spec cold and expanded 20 ORDO commands; a judge scored fidelity vs
+  the hidden originals.
+- **Checked/verified (measured):**
+  - **Compression: 20 real prompts 437 → 285 o200k = 35% (cl100k 35.5%)**, avg 21.9 → 14.2 tok/prompt;
+    benchmark 32 → 11 (66%). Both tokenizers agree. **~7-10x the vocabulary layer's ~1-5%** — the
+    grammar IS the lever, as the matrix predicted.
+  - Every glyph + the example encodings re-measured 1/1 (two came out cheaper than the design claimed).
+  - **Decodability v1 = 1.63/2 mean**, and the test EARNED its keep by exposing real bugs: a `信`
+    double-assignment (JSON + certainty) that made all 3 decoders agree on the WRONG meaning (proof
+    that high agreement ≠ correctness), unitless numbers ("80"→"80 items" not words), `↓` overload,
+    `×` ambiguity, droppable format glyphs.
+  - **Fixed → v2 = 1.70/2 mean, 3% wrong:** `构` for JSON (collision gone), count-units (字/行/段/分/页/
+    节/项), and a decoder contract (§7b). The catastrophe (#9) now decodes as JSON across all 3; units
+    land; the overload is gone. The faithful core — verbs + 心/据/加/¬/调/业 + literals — decoded
+    cleanly across 3 independent agents = genuinely **zero-shot legible**, not an author-only cipher.
+  - **Residual (honest):** mostly UNDER-ENCODING (encoder trading fidelity for brevity on #3/#5/#7),
+    not a language defect; plus 2 glyph-semantic fuzzy spots (※ extract-vs-summarize, × constraint)
+    now clarified in spec §7b + an encoder-discipline note. Stopped at 1.70 — the last tick to 2.0 is
+    not worth it.
+- **Open:** decode tested on the workflow model — Claude main / other models may differ (re-test per
+  target); a larger prompt set; the RUNTIME/harness that applies ORDO (the separate second concept,
+  later); the VERBOSITY/output layer (the biggest remaining lever, later).
+
+## Next: P3 / harness
+P3 = the skillstone (a single self-contained `ORDO.md` a user pastes into any LLM to teach it ORDO in
+one shot) + writing-system polish. Then the separate **harness** concept (the runtime that
+auto-encodes/decodes + the verbosity layer). The language itself (P0-P2) is now real and measured.
