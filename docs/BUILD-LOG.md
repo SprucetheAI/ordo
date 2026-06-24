@@ -136,7 +136,28 @@ is OPEN. No saving is claimed without a `tokcost.py` number; no symbol ships wit
   target); a larger prompt set; the RUNTIME/harness that applies ORDO (the separate second concept,
   later); the VERBOSITY/output layer (the biggest remaining lever, later).
 
-## Next: P3 / harness
+## P3 — the output layer / framework (format + verbosity) (2026-06-24)
+- **What:** `spec/output.md` (the output framework) + `tools/formatbench.py`. Answers "is JSON best?"
+  and "is there a compressed JSON?" with measurement, and integrates the verbosity layer (ponytail +
+  caveman) — the user's "whole framework including ponytail + compression + caveman".
+- **How:** measured 8 serialization formats across 4 data shapes (`formatbench.py`); measured ponytail
+  + caveman on real samples; ran a read-accuracy comprehension workflow (JSON vs TSV vs TOON).
+- **Checked/verified (measured):**
+  - **Format is shape-dependent, and pretty-JSON is the worst everywhere.** Uniform array: TSV −59% /
+    TOON −44% vs minified JSON; numeric table: TSV −51%; nested/heterogeneous: minified JSON wins
+    (TOON +22%, YAML +31% are WORSE). YAML is a token trap. Minifying JSON alone saves 47-66%.
+  - **Compression does no harm to comprehension:** JSON/TSV/TOON all scored **100% (16/16)** on 8
+    factual questions × 2 readers, including multi-row sum + boundary cases. (Caveat: small clean
+    single-table test.) So the ~55% tabular saving is real, not a false economy.
+  - **Verbosity is the biggest lever:** ponytail (cut preamble/restate/closer/meta) = **77% off a
+    typical answer, LOSSLESS**; caveman (terse register, operational text only, never explainers) = 68%
+    off. These dwarf the ~35% input-grammar saving because output dominates the bill.
+  - The framework = one decision: pick FORMAT by shape (never pretty-JSON) → always PONYTAIL (lossless)
+    → CAVEMAN operational-only → honor ORDO directive overrides (↑/全 suspend caveman, 段 forces prose).
+- **Open:** read-accuracy on large/multi-table/ambiguous data; a TOON encoder edge cases; the RUNTIME
+  that actually applies all this (the separate harness concept); P4 skillstone (one-paste ORDO.md).
+
+## Next: P4 / harness
 P3 = the skillstone (a single self-contained `ORDO.md` a user pastes into any LLM to teach it ORDO in
 one shot) + writing-system polish. Then the separate **harness** concept (the runtime that
 auto-encodes/decodes + the verbosity layer). The language itself (P0-P2) is now real and measured.
