@@ -1,0 +1,20 @@
+sum txt 3bul conc foc:financials aud:lay no:preamble
+refac code rm:duplication keep:behavior inc:type-hints
+expl 'transformer' stepwise aud:lay
+trans txt FR tone:formal keep:terms keep:structure
+cmp 'React,Vue' tbl foc:'learning curve, ecosystem, performance'
+fix code inc:'1-line cause' keep:interface
+gen 'email: decline meeting, propose 2 alt times next week' tone:friendly
+rate this foc:'clarity, structure, argument' inc:'1 improvement each'
+extr data 'dates, people, dollar amounts' json
+plan 'migrate monolith->microservices' inc:'flag riskiest step'
+rwr this conc 80w no:'marketing fluff' inc:confident
+gen 5names 'budgeting app, students' inc:'short, memorable' no:generic
+crit this only:security inc:'line refs + severity rank'
+sum txt 2para aud:lay
+expl 'authentication vs authorization' inc:examples
+crit txt foc:'weakest assumption' inc:'brutally honest + how to test it'
+trans code 'TypeScript' keep:names inc:'JSDoc per param'
+anlz this 3 'causes' inc:'check each, ranked by probability'
+short this 3sent tone:friendly keep:apologetic
+outl '20-min talk, prompt engineering' aud:exp inc:'timings/section'
