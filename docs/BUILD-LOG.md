@@ -36,6 +36,30 @@ is OPEN. No saving is claimed without a `tokcost.py` number; no symbol ships wit
   - Modifiers, operand type-tags, epistemic markers, chaining = Phase 2 (`grammar.md`).
   - Lossless round-trip gate over a task set = Phase 4.
 
+## P1.5 — the maximal glyph pool (cross-script, non-human-readable) (2026-06-24)
+- **What:** `spec/glyph-pool.tsv` — the maximal set of single-token glyphs harvested across ~46
+  Unicode blocks (all major scripts), cross-bred and deliberately non-human-readable (per the
+  GLOSSOPETRAE L3 finding that illegibility is fine for an AI reading from a spec). The raw material
+  the alien alphabet is assigned from.
+- **How:** `tools/glyphpool.py` enumerates candidate codepoints across Greek/Cyrillic/Armenian/Hebrew/
+  Arabic/Syriac/Georgian/Devanagari/Bengali/Tamil/Thai/Lao/Tibetan/Myanmar/Hiragana/Katakana/Bopomofo/
+  Hangul-jamo/Kangxi/CJK/Yi/Tifinagh/Runic/Ethiopic/Cherokee + math/arrows/symbols/braille/box/blocks;
+  filters control/combining/space/unassigned; measures each on cl100k + o200k; classifies.
+- **Checked/verified (measured):**
+  - **Tier A (1 token in BOTH cl100k+o200k) = 511 glyphs; Tier B (1 token in o200k only) = 1163;
+    full pool = 1674.** Written to `spec/glyph-pool.tsv` (glyph, codepoint, block, costs, tier, name).
+  - Cross-bred 12-glyph alien string `άРіنหまバ了倍单因密` = **12 tokens** (1 per glyph) in both
+    tokenizers, and unreadable by any human. Proof the cross-script alphabet is both efficient and
+    illegible.
+  - Richest blocks: CJK unified (201 A / 524 B — morpheme-dense ideographs), Cyrillic (58/64), Kana
+    (96/54), Arabic (36/78), Thai (31/22), Greek (27/36), Hebrew (14/13).
+- **Design note:** literal *composite*/combining glyphs (ligatures, bind-runes, combining marks) are
+  excluded — BPE splits them into MORE tokens. "Cross-breed" = freely mix single glyphs from all
+  scripts, not fuse codepoints.
+- **Open:** Claude/Gemini tokenizers proprietary (GPT proxy; Tier B especially may differ on Claude);
+  in-context adjacency re-validated in Phase 4; the ALPHABET ASSIGNMENT (which alien glyph maps to
+  which directive/operand/modifier) is the next design step, drawing from this pool.
+
 ## Next: P2 — the grammar
 Operand type-tags (text/file/code/list determinatives), the modifier set (brevity/length/format/
 tone), the mandatory epistemic slot (certainty + source), directive chaining (pipe), and the
