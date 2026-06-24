@@ -34,6 +34,19 @@ own best behaviors (chain-of-thought, devil's advocate, senior-review) get trigg
 layer is also a **quality** lever, not only a token lever — a 1-token code that reliably invokes a
 strong reasoning mode.
 
+## Behavioral macros — the "do it good, not fast" layer (serves pillars P4/P7/P8)
+The highest-value macros, because they encode whole behavioral directives that push the model off the
+generic averaged answer and onto *this* problem. Measured (o200k): each is 1-2 tokens, saving 20-29/use.
+
+| code | expands to | saved/use | pillar |
+|---|---|---|---|
+| `arch` | before extending, assess whether the foundation is fragmented or won't scale for this use case; if so, propose a re-architecture instead of building on top | 29 | P7 rebuild-vs-fix |
+| `fresh` | do not give the generic averaged answer; reason from this specific case's constraints and do what is actually best here | 21 | P4 quality |
+| `tidy` | no scaffolding for later, no restated context, no ceremony; the smallest correct thing, delete before add | 20 | P6/P8 |
+
+These are token-cheap AND the levers for the pillars a token count can't touch. Their effect is
+test-gated by the P7/P8 workflows (`spec/pillars.md`), not assumed.
+
 ## Decode rule (from the C7 test, 1.8/2)
 A macro **augments** the base instruction, it does not replace it. `this gap` = "address this, AND what
 am I not asking" (not just the gap question alone). The only decode miss in testing was decoders

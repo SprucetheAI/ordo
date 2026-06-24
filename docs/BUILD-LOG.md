@@ -249,6 +249,21 @@ not just the command (grammar) and the response (verbosity). Integrated `headroo
   phrase/macro map to documents) and relevance-gating (LongLLMLingua's +17% RAG — compression that
   IMPROVES quality). JIT/don't-send-it is the biggest but belongs in the auto-apply runtime.
 
+## The pillars framework — multi-pillar, test-gated (2026-06-24)
+User reframe: token length is ONE pillar; the goal is a cleaner/less-hallucinated/more
+architecturally-honest system where reduced rework is *calculable*. Lossless-first; every pillar
+test-gated, never theoretical.
+- **`spec/pillars.md`** — 8 pillars, each with metric + gate + baseline: P1 context-length, P2 token-
+  output, P3 speed (real wall-clock, not proxy), P4 quality, P5 hallucination, P6 tidyness, P7
+  architecture (rebuild-vs-fix), P8 rework-reduction. Rule: a compression % counts only if its
+  comprehension/quality gate passes.
+- **`tools/pillars.py`** — the scoreboard; runs deterministic gates live. Current: **5/8 MEASURED**
+  (P1 lossless-TSV 68% / mixed 45%, P2 ponytail 77%, P4 6-2-1, P5 no-backfire+calibration, P6 filler-
+  flag), P3 PROXY-ONLY (real wall-clock TODO), P7+P8 UNMEASURED → gated by the P7/P8 workflow.
+- **Behavioral "do it good" macros** (`spec/macros.md`): `arch` (rebuild-vs-fix, saves 29/use), `fresh`
+  (skip the averaged answer, 21), `tidy` (smallest correct thing, 20) — token-cheap levers for the
+  pillars a token count can't touch (P4/P7/P8). Effect test-gated, not assumed.
+
 ## The language is done (P0-P4). Next: the harness (separate concept)
 P0 alphabet → P1.x pool/matrix/allocation → P2 grammar (ORDO-G, ~35%, decode 1.70) → P3 output
 framework (format-by-shape + ponytail 77% + caveman) → P4 skillstone (`ORDO.md`, 1.75/2). The LANGUAGE
