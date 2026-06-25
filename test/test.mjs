@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert";
 import { decode, emit, bestFormat, ponytailFlags, compressInbound, getOperatingProfile } from "../src/index.js";
 import { priceFor, costOf, parseTranscript, aggregate } from "../tools/measure.mjs";
-import { resolveModel } from "../src/index.js";
+import { resolveModel, classifyTask } from "../src/index.js";
+import { timeRuns } from "../tools/clock.mjs";
 
 test("decode benchmark command carries all key terms", () => {
   const e = decode("σ文3列简心金业通¬序").toLowerCase();
@@ -92,4 +93,31 @@ test("resolveModel cascade fires by signal priority", () => {
   assert.strictEqual(resolveModel({ tools: [{ type: "web_search_20250305" }] }, p), "web");            // webSearch
   assert.strictEqual(resolveModel({ model: "claude-haiku-4" }, p), "cheap");                           // background
   assert.strictEqual(resolveModel({ model: "opus", tokenCount: 1000 }, p), "opus");                    // default
+});
+
+// --- spec/thinking.md §1: complexity triage (LIGHT vs STRICT; ANY hard trigger ⇒ STRICT) ---
+test("classifyTask: no hard trigger → LIGHT, only the 2 always-on instincts", () => {
+  const r = classifyTask({});
+  assert.strictEqual(r.mode, "LIGHT");
+  assert.deepStrictEqual(r.engage, ["diction", "verify-assert"]);
+  assert.ok(!r.gate); // no multi-pass gate on a light task
+});
+test("classifyTask: ANY single hard trigger ⇒ STRICT (OR, not AND)", () => {
+  assert.strictEqual(classifyTask({ irreversible: true }).mode, "STRICT");
+  assert.strictEqual(classifyTask({ loadBearing: true }).mode, "STRICT");
+});
+test("classifyTask: a real fork routes EXPERIMENTALIST, else REFEED", () => {
+  assert.strictEqual(classifyTask({ realFork: true }).gate, "EXPERIMENTALIST");
+  assert.strictEqual(classifyTask({ longHorizon: true }).gate, "REFEED");
+});
+test("classifyTask: STRICT arms the instincts the fork needs", () => {
+  const r = classifyTask({ longHorizon: true, multiStep: true, buildsFile: true, wideSolutionSpace: true });
+  for (const x of ["goal-lock", "ledger", "reuse-replan", "divergence-width", "self-heal"]) assert.ok(r.engage.includes(x), x);
+});
+
+// --- tools/clock.mjs: the wall-clock latency harness (the path to EARN "faster") ---
+test("clock timeRuns returns n runs + a sane median", () => {
+  const r = timeRuns(() => { let x = 0; for (let i = 0; i < 1000; i++) x += i; }, 3);
+  assert.strictEqual(r.runs.length, 3);
+  assert.ok(r.medianMs >= 0 && r.maxMs >= r.minMs);
 });

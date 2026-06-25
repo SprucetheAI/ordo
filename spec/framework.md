@@ -56,6 +56,15 @@ Each pass is **DRAFT → REFEED → DECIDE**, with the refeed step being the hea
 
 The discipline that makes this cheap: **refeed the delta, not the transcript.** Each pass re-drafts against a tight, typed critique of the *previous* draft, so context stays clean (Fable: *keep main context clean*) and you pay for correction, not for re-reading your own history.
 
+> The single-pass distillation of this re-read is `spec/thinking.md` §6 (VERIFY-ASSERT): derive-then-assert the ONE load-bearing claim inside the first pass, mark its support tier, escalate to the full REFEED loop only when a load-bearing claim stays unverified AND being wrong is expensive. Use the 1× instinct by default; this loop is the exception spend.
+
+## 2.5 · SELF-HEAL — diagnose the CAUSE before regenerating (the failure branch · Reflexion 2303.11366)
+On a failed gate, DECIDE does NOT blind-retry — blind retry collapses to baseline on hard tasks (Reflexion ablation 0.68→0.60). Write ONE typed reflection line — **cause: \<which earlier step / premise / assumption produced this\>** — then branch on the diagnosis:
+- **local bug** (footing sound, one wrong line) → refeed the DELTA in place (the normal cycle, 1× over the fix).
+- **structural** (the cause is an earlier premise / foundation) → DISCARD the broken branch and regenerate from the re-derived premise. Never re-adapt a footing the diagnosis just named as the fault — that is the blind-retry failure mode.
+
+The single verbal credit-assignment step is the whole lever; the heal is cheap when the fix is local and pays the regenerate cost only when the cause is structural. **SELF-GROW (honest):** a confirmed `{pattern, cause, fix, gate-that-caught-it}` lesson accretes to the scoreboard (`tools/pillars.py` / `docs/lessons`), bounded + deduped, read at the next run's GATE-PRE — a **HUMAN-RUN, evidence-gated** loop, NOT autonomous self-growth (that claim stays NULL). SELF-CLEAN (loop-kill, revert-gate, rot-ledger, cost-meter) is already shipped.
+
 ## 3 · Choosing the loop *shape* per task (the method selector)
 
 REFEED is not one loop — it is a small family, and the task picks the member. This is where the best long-form/loop methods fold in, each used *only where it pays*:

@@ -171,6 +171,25 @@ export function resolveModel(req = {}, policy = null) {
   return strong;
 }
 
+// ---- complexity triage (spec/thinking.md §1): the single-pass effort dispatcher ----
+/** Given the 5 CONTEXT-ROT HARD-signal booleans + the task shape, return the routing decision the thinking
+ *  protocol consumes. ANY hard trigger ⇒ STRICT (conservative-by-design: OR not AND — one irreversible side
+ *  effect is enough). This is the DETERMINISTIC rule; reading the signals off a real task is an in-reasoning
+ *  judgment whose accuracy is UNMEASURED (a conservative call, not a precision number). Routes EFFORT/STRUCTURE
+ *  only — never a weaker model (resolveModel stays default-strong). LIGHT → only the two always-on 1× lossless
+ *  instincts fire; STRICT arms the ledger + the instincts the fork actually needs + the routed gate. */
+export function classifyTask(signals = {}) {
+  const { irreversible = false, realFork = false, longHorizon = false, broad = false, loadBearing = false,
+    multiStep = false, buildsFile = false, wideSolutionSpace = false } = signals;
+  const engage = ["diction", "verify-assert"]; // always-on, lossless, 1×
+  if (!(irreversible || realFork || longHorizon || broad || loadBearing)) return { mode: "LIGHT", engage };
+  if (multiStep) engage.push("goal-lock", "ledger");
+  if (buildsFile) engage.push("reuse-replan");
+  if (wideSolutionSpace) engage.push("divergence-width");
+  engage.push("self-heal");
+  return { mode: "STRICT", engage, gate: realFork ? "EXPERIMENTALIST" : "REFEED" };
+}
+
 // ---- the paste-in spec (METHODOLOGY: load as text, give to your LLM) ----
 const _cache = {};
 function read(p) { if (!(p in _cache)) _cache[p] = readFileSync(join(ROOT, p), "utf8"); return _cache[p]; }

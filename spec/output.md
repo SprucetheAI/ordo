@@ -51,6 +51,18 @@ The cheapest tokens are the ones never emitted. Cut, with zero information loss:
 Measured: a typical chatty answer **146 → 34 tokens (77% off)** with the code and the explanation fully
 intact — only filler removed. **Apply this before anything else; it is the safest, biggest win.**
 
+### Diction — always-on, lossless: cheapest-faithful WORD choice (single pass, generation-time)
+Ponytail decides WHICH words survive; diction decides their **form**, inline as you generate — never a rewrite pass:
+- When two phrasings carry equal signal, pick the one that is **fewer tokens AND more common** ("use" over
+  "utilize", "so" over "as a result", "about" over "approximately"). Plain Germanic core over Latinate inflation.
+- The higher-frequency word tokenizes shorter AND samples **more deterministically** (lower per-step entropy) —
+  output is steadier across runs at no quality cost. That determinism, not a token-%, is the win here.
+- **TIE-BREAK only, never a quality cut:** never trade a precise term for a vague short one (keep "idempotent",
+  "race condition", "p95"); never touch a quoted string, identifier, API name, or number; never compress
+  explainer/creative prose into worse prose.
+- **Do NOT consult a synonym/swap table.** ORDO measured that lever at **~1%** (`freqmatrix.py` — BPE already
+  1-tokens most common words); we refuse to bank it. The token savings live in ponytail/format, not diction.
+
 ### Caveman — bounded: terse register on OPERATIONAL text only
 Drop articles, copulas, and connective filler; use arrows and fragments. Apply to **operational /
 internal** text: plans, status lines, structured reasoning, working notes, commit bodies, agent-to-agent.

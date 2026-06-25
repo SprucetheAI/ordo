@@ -35,29 +35,34 @@ def _inbound_gate():
 
 
 def _p3():
-    """P3: the real cost/token/duration meter is now BUILT — `node tools/measure.mjs` reads Anthropic's own
-    `usage.*` + timestamps from Claude Code's JSONL (lossless billed counts, no re-tokenization). Status
-    upgrades to COMPUTED the moment a paired A/B is recorded in tools/measure-ab.json
-    ({"on": <measure result>, "off": <measure result>}); until then the SPEED claim stays a proxy — the meter
-    measures real spend/duration, but an ORDO on-vs-off delta needs the paired run."""
+    """P3: split honestly into COST (measurable now via tools/measure.mjs) and SPEED/wall-clock (a FALLACY on a
+    token proxy until tools/clock.mjs records a paired per-task latency A/B). Each half upgrades PROXY->COMPUTED
+    independently when its A/B file lands (tools/measure-ab.json for cost, tools/clock-ab.json for latency)."""
     ab = ROOT / "tools" / "measure-ab.json"
+    clk = ROOT / "tools" / "clock-ab.json"
+    tier = "PROXY-ONLY"
+    cost_msg = ("cost: meter BUILT (tools/measure.mjs reads billed usage.* from Claude Code JSONL, lossless) — "
+                "record tools/measure-ab.json to upgrade to COMPUTED")
+    speed_msg = ("wall-clock: UNMEASURED — 'faster' is a fallacy on a token proxy (token count != latency); "
+                 "tools/clock.mjs is the latency harness, record tools/clock-ab.json to earn it")
     if ab.exists():
         try:
             d = json.loads(ab.read_text(encoding="utf-8"))
             on, off = d["on"]["totals"], d["off"]["totals"]
             dt = 100 * (off["totalTokens"] - on["totalTokens"]) // max(off["totalTokens"], 1)
-            dc = off["costUsd"] - on["costUsd"]
-            return ("COMPUTED",
-                    f"A/B measured: {dt}% fewer tokens, ${dc:.4f} cheaper (ORDO on vs off) via tools/measure.mjs — "
-                    "real billed usage.* counts; retail prices DIRECTIONAL for Max-plan users",
-                    "ordo measure on-run vs off-run (tools/measure-ab.json)")
+            cost_msg = f"cost A/B: {dt}% fewer tokens, ${off['costUsd'] - on['costUsd']:.4f} cheaper (measure.mjs; retail DIRECTIONAL for Max-plan)"
+            tier = "COMPUTED"
         except Exception:
             pass
-    return ("PROXY-ONLY",
-            "output-token saving is the proxy; the real meter is BUILT (node tools/measure.mjs reads billed "
-            "usage.*+duration from Claude Code JSONL, lossless) — record a paired on/off run to "
-            "tools/measure-ab.json to upgrade this to COMPUTED",
-            "ordo measure A/B (harness built; paired run pending)")
+    if clk.exists():
+        try:
+            c = json.loads(clk.read_text(encoding="utf-8"))
+            speed_msg = f"wall-clock A/B: {c['fasterPct']}% lower median per-task latency (clock.mjs; pair with the blind quality judge)"
+            tier = "COMPUTED"
+        except Exception:
+            pass
+    return (tier, f"{cost_msg}; {speed_msg}",
+            "ordo measure (cost A/B → measure-ab.json) + node tools/clock.mjs (latency A/B → clock-ab.json)")
 
 
 def scorecard():
@@ -71,7 +76,7 @@ def scorecard():
         {"id": "P2", "name": "Token output", "status": "COMPUTED",
          "value": f"ponytail {cut}% computed live on this sample; 77% on a longer verbose sample (agent-measured)",
          "gate": "ponytail filler-cut, quality-equality"},
-        {"id": "P3", "name": "Speed (wall-clock)", "status": p3_status, "value": p3_value, "gate": p3_gate},
+        {"id": "P3", "name": "Cost (measurable) + speed (unmeasured)", "status": p3_status, "value": p3_value, "gate": p3_gate},
         {"id": "P4", "name": "Quality of output", "status": "AGENT-JUDGED",
          "value": "ORDO 6 win / 2 tie / 1 loss vs English (blind, structure-driven)",
          "gate": "multi-agent blind judge (C4)"},
