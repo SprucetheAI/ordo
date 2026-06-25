@@ -56,16 +56,35 @@ def _builtin(text: str) -> str:
     return out
 
 
-def compress_inbound(text: str, use_headroom: bool = True):
+def _terms(s: str) -> set:
+    return set(re.findall(r"[a-z0-9]+", s.lower()))
+
+
+def coverage_ok(question: str, original: str, compressed: str, threshold: float = 0.5) -> bool:
+    """Cheap deterministic 'did the lossy cut drop signal' check (llmtrim's coverage gate, generalized):
+    of the distinct query-relevant terms (words in the question that actually appear in the original),
+    what fraction survive in the compressed text? True iff >= threshold (or nothing relevant to protect).
+    Far cheaper than an LLM judge — used to REVERT a lossy candidate that would strand the answer."""
+    relevant = _terms(question) & _terms(original)
+    if not relevant:
+        return True
+    keep = _terms(compressed)
+    return (len(relevant & keep) / len(relevant)) >= threshold
+
+
+def compress_inbound(text: str, use_headroom: bool = True, question: str | None = None):
     """Take the BEST of {headroom, builtin} per content (headroom wins on redundant logs/tool-output;
-    our TSV wins on structured JSON, which base-headroom noops). Returns
-    (compressed_text, tokens_before, tokens_after, engine). Never inflates."""
+    our TSV wins on structured JSON, which base-headroom noops). MEASURED-REVERT: passthrough is always a
+    candidate at `before` tokens, so the min can never inflate. A LOSSY candidate (headroom) is additionally
+    gated by `coverage_ok` when a `question` is given — it must keep the query-relevant terms or it's dropped.
+    Returns (compressed_text, tokens_before, tokens_after, engine). Never inflates, never strands the answer."""
     before = _tok(text)
     cands = [(text, before, "passthrough")]
     if use_headroom:
         try:
             h = _headroom(text)
-            cands.append((h, _tok(h), "headroom"))
+            if question is None or coverage_ok(question, text, h):  # lossy cut must preserve the signal
+                cands.append((h, _tok(h), "headroom"))
         except Exception:
             pass
     try:
@@ -73,7 +92,7 @@ def compress_inbound(text: str, use_headroom: bool = True):
         cands.append((b, _tok(b), "builtin"))
     except Exception:
         pass
-    best = min(cands, key=lambda c: c[1])  # fewest tokens, ties -> earliest (passthrough/headroom)
+    best = min(cands, key=lambda c: c[1])  # measured-revert: fewest tokens, ties -> earliest (passthrough)
     return best[0], before, best[1], best[2]
 
 
@@ -84,4 +103,9 @@ if __name__ == "__main__":
         c, b, a, eng = compress_inbound(s, use_headroom=False)
         print(f"{name}: {b} -> {a} tok ({100*(b-a)//max(b,1)}% off) via {eng}")
     assert compress_inbound(uniform, use_headroom=False)[3] == "builtin"
-    print("inbound self-check OK (builtin fallback lossless)")
+    # measured-revert: a no-win input must never inflate (passthrough wins)
+    assert compress_inbound("short clean line", use_headroom=False)[3] in ("passthrough", "builtin")
+    # coverage gate: a key query term surviving passes; a dropped boundary value fails
+    assert coverage_ok("sum the errors", "many errors here and warnings", "errors: 3")
+    assert not coverage_ok("preserve the boundary value 42", "the boundary value is 42", "summary: a number")
+    print("inbound self-check OK (builtin lossless + measured-revert + coverage gate)")

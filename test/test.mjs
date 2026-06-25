@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert";
 import { decode, emit, bestFormat, ponytailFlags, compressInbound, getOperatingProfile } from "../src/index.js";
 import { priceFor, costOf, parseTranscript, aggregate } from "../tools/measure.mjs";
+import { resolveModel } from "../src/index.js";
 
 test("decode benchmark command carries all key terms", () => {
   const e = decode("σ文3列简心金业通¬序").toLowerCase();
@@ -26,6 +27,12 @@ test("ponytail flags the filler", () => assert.deepStrictEqual(ponytailFlags("Gr
 test("inbound compresses a JSON array to TSV", () => {
   const out = compressInbound(JSON.stringify({ rows: [{ a: 1, b: 2 }, { a: 3, b: 4 }] }));
   assert.ok(out.includes("a\tb"), out);
+});
+test("inbound measured-revert never inflates", () => {
+  const clean = "short clean line with no redundancy";
+  assert.strictEqual(compressInbound(clean), clean);                       // no-win → passthrough, not inflated
+  const tiny = JSON.stringify({ r: [{ a: 1 }] });
+  assert.ok(compressInbound(tiny).length <= tiny.length);                  // output never larger than input
 });
 test("operating profile loads", () => assert.ok(getOperatingProfile().includes("ORDO")));
 
@@ -61,4 +68,18 @@ test("aggregate dedupes on key (keep-best) and sums real tokens + duration", () 
   assert.strictEqual(r.totals.outputTokens, 80 + 20);       // kept the higher m1
   assert.strictEqual(r.totals.durationMs, 10 * 60 * 1000);  // 10min span
   assert.ok(r.totals.costUsd > 0 && r.warnings.length === 0);
+});
+
+// --- Phase 6: opt-in model routing (default-strong, never auto-downgrade) ---
+test("resolveModel is default-strong with no policy (never downgrades)", () => {
+  assert.strictEqual(resolveModel({ model: "claude-opus-4", tokenCount: 99999 }), "claude-opus-4");
+});
+test("resolveModel cascade fires by signal priority", () => {
+  const p = { default: "opus", longContext: "long", think: "think", webSearch: "web", background: "cheap", longContextThreshold: 60000 };
+  assert.strictEqual(resolveModel({ subagentTag: "explicit-x", tokenCount: 99999 }, p), "explicit-x"); // override wins
+  assert.strictEqual(resolveModel({ tokenCount: 70000 }, p), "long");                                  // longContext
+  assert.strictEqual(resolveModel({ thinking: true }, p), "think");                                    // think
+  assert.strictEqual(resolveModel({ tools: [{ type: "web_search_20250305" }] }, p), "web");            // webSearch
+  assert.strictEqual(resolveModel({ model: "claude-haiku-4" }, p), "cheap");                           // background
+  assert.strictEqual(resolveModel({ model: "opus", tokenCount: 1000 }, p), "opus");                    // default
 });

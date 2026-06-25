@@ -135,13 +135,40 @@ const FILLER = ["great question", "sure!", "certainly", "i hope this helps", "le
 /** Return the ponytail-forbidden filler phrases present (the verbosity layer says cut these). */
 export function ponytailFlags(text) { const low = text.toLowerCase(); return FILLER.filter((p) => low.includes(p)); }
 
-/** Lossless built-in inbound compressor: JSON arrays -> TSV; else collapse dead whitespace. */
+// token proxy for the JS runtime (no tiktoken here): chars/4 is the standard rough estimate.
+const estTokens = (s) => Math.ceil(s.length / 4);
+
+/** Lossless built-in inbound compressor with a MEASURED-REVERT gate: JSON arrays -> TSV; else collapse
+ *  dead whitespace; then re-measure and REVERT to the original if the transform did not strictly shrink
+ *  it. Worst case = passthrough, never inflation — the lossless-first promise as a mechanism, not a slogan. */
 export function compressInbound(text) {
   const t = text.trim();
+  let out = text;
   if (t[0] === "[" || t[0] === "{") {
-    try { let data = JSON.parse(t); if (Array.isArray(data)) data = { _rows: data }; return emit(data); } catch { /* fall through */ }
+    try { let data = JSON.parse(t); if (Array.isArray(data)) data = { _rows: data }; out = emit(data); } catch { /* fall through */ }
   }
-  return text.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ");
+  if (out === text) out = text.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ");
+  return estTokens(out) < estTokens(text) ? out : text; // measured-revert: never make it worse
+}
+
+// ---- opt-in model routing (claude-code-router's TABLE SHAPE, not its proxy) ----
+/** Pick the model for a request BEFORE spawning, by a 5-signal priority cascade. DEFAULT-STRONG: with no
+ *  `policy` it returns the request's own model and NEVER downgrades — routing is lossy by construction (a
+ *  cheap model trades quality for cost), so it is opt-in. Priority: explicit subagent override → longContext
+ *  → think → webSearch → background-cheap (haiku-class) → default. `req`: {tokenCount, lastTurnInputTokens,
+ *  thinking, tools, model, subagentTag}. `policy`: {default, longContext, think, webSearch, background,
+ *  longContextThreshold}. */
+export function resolveModel(req = {}, policy = null) {
+  const strong = (policy && policy.default) || req.model || null;
+  if (!policy) return strong; // opt-in: no policy → never downgrade
+  const { tokenCount = 0, lastTurnInputTokens = 0, thinking = false, tools = [], model = "", subagentTag = null } = req;
+  const longThreshold = policy.longContextThreshold ?? 60000;
+  if (subagentTag) return subagentTag; // explicit per-subagent override wins
+  if (policy.longContext && (tokenCount > longThreshold || (lastTurnInputTokens > longThreshold && tokenCount > 20000))) return policy.longContext;
+  if (policy.think && thinking) return policy.think;
+  if (policy.webSearch && tools.some((t) => String((t && t.type) || t).startsWith("web_search"))) return policy.webSearch;
+  if (policy.background && /haiku/i.test(model)) return policy.background;
+  return strong;
 }
 
 // ---- the paste-in spec (METHODOLOGY: load as text, give to your LLM) ----

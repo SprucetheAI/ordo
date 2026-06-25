@@ -75,6 +75,25 @@ on producing output:
        段 forces prose; 构/表 force the format; an epistemic glyph (信/源/?) adds its required marking.
 ```
 
+## Part 4 — the measured-revert gate (the runtime law, not a slogan)
+
+Lossless-first is only real if it is **enforced**, so every inbound/output transform is wrapped in a gate:
+
+```
+on transforming text (inbound compaction, format conversion, a trim):
+  1. count tokens BEFORE and AFTER on the real tokenizer (proxy: chars/4 where none is available)
+  2. if AFTER >= BEFORE  -> REVERT to the original   (worst case = passthrough, never inflation)
+  3. if the transform is LOSSY (drops content, e.g. headroom/retrieval) -> additionally require a
+     COVERAGE check: of the distinct query-relevant terms present in the source, >= threshold (0.5)
+     must survive in the result, else REVERT. (A cheap deterministic 'did the cut drop the answer'
+     signal — far cheaper than an LLM judge.)
+```
+
+This makes "never make it worse" a mechanism. The runtime already implements it: `compressInbound`
+(JS, `src/index.js`) reverts on no-win; `compress_inbound` (Python, `harness/inbound.py`) keeps
+`passthrough` as a candidate so the `min` can never inflate, and gates any lossy candidate through
+`coverage_ok(question, original, compressed)`. A lossy win that strands a load-bearing term is not a win.
+
 ## The measured stack (why output is the prize)
 | layer | typical reduction | loss |
 |---|---|---|

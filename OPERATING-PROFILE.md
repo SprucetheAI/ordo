@@ -22,9 +22,14 @@ the orchestration discipline. Depth lives in `spec/` and `docs/`; this is the sp
   never explainers. `spec/output.md`.
 - **Inbound context:** compress what the model reads — headroom for redundant logs/tool-output
   (lossy+retrieval), our TSV for structured data (lossless), lossless-first; never glyph the surface
-  (it inflates tokens). `spec/pipeline.md`, `harness/inbound.py`.
+  (it inflates tokens). **Measured-revert gate:** every transform is re-measured and REVERTED if it does
+  not shrink (worst case = passthrough); a lossy cut must also pass a coverage check (query-relevant terms
+  survive) or it is dropped. `spec/output.md` Part 4, `spec/pipeline.md`, `harness/inbound.py`.
 - **Macros** for whole recurring intents — `cot risk arch fresh tidy eli5 srev` … (1-2 tokens each).
   `spec/macros.md`.
+- **Code context:** prefer a code-graph provider (codegraph default / graphify multimodal) — structure parsed
+  free as a *navigation index* (never burns tokens); open the file for exact bytes, never trust an INFERRED edge
+  as fact. AST-first, token-budgeted render, confidence-tagged edges. `spec/code-context.md`.
 
 ## 2. THE GATES — classify first, then route (each fires only where it earns its cost)
 | task | gate | what it does |
@@ -35,6 +40,10 @@ the orchestration discipline. Depth lives in `spec/` and `docs/`; this is the sp
 | any artifact, before "done" | **EVALUATION** | rate honestly vs the real goal — debias, structure-over-cosmetics, honest pros + caveats, optimal-band (`spec/evaluation-gate.md`) |
 | long-form autonomous run | **AUTONOMY** | GATE-PRE → act(propose-only) → observe → verify → escalate(ladder) → terminate; kill wrongful loops; hard budgets (`spec/autonomy.md`) |
 | long / complex / many-file context | **CONTEXT-ROT** | complexity classifier routes complex work to a LEDGER + compact-at-threshold (warn 70/flush 85/hard 90; drop tool-output first; keep load-bearing at the head+tail edges, never the lost middle; rehydrate via the test gate). Simple work stays on the standard protocol — no overhead (`spec/context-rot.md`) |
+
+**Plan shape:** decompose a multi-step job to a lower-id-only DAG with a per-node `testStrategy` + complexity-gated
+expansion; the AUTONOMY gate iterates the pure `priority→deps→id` next-task picker. Format, not a trust model —
+route a high-stakes plan through REFEED. `spec/decompose.md`.
 
 ## 3. THE PILLARS — what it optimizes (test-gated, scoreboard in `tools/pillars.py`)
 P1 context · P2 token-output · P3 speed · P4 quality · P5 hallucination · P6 tidyness · P7 architecture
@@ -53,6 +62,22 @@ stage needs all of the prior. Git: commit per unit, push only when CI needs the 
 The experimentalist divergence (invert-obvious / change-paradigm / steal-from-far-field / remove-
 required / exaggerate / constraint-roulette / change-POV), gated to hard forks. Its value is the grafts
 AND the adversarial self-culling that stops novelty-for-its-own-sake.
+
+## 6. ROUTING — cheap-vs-strong by task (OPT-IN, default-strong)
+A declarative `route:` policy picks the model per task *before* spawning, by a 5-signal cascade (explicit
+subagent override → longContext → think → webSearch → background-cheap → default). **Default everything to the
+strong model; never auto-downgrade** — routing is lossy by construction (a short prompt can be a hard fork), so
+it stays opt-in like the glyph language, a user-declared cost preference. Resolver: `resolveModel(req, policy)`
+in `src/index.js`. Example policy:
+```yaml
+route:
+  default: claude-opus-4          # strong, the floor for everything
+  longContext: gemini-1.5-pro     # >60k tokens (or last-turn >60k AND current >20k)
+  think: claude-opus-4            # reasoning/plan flag set
+  webSearch: claude-sonnet-4      # a web_search tool is present
+  background: claude-haiku-4      # throwaway/haiku-class calls
+  longContextThreshold: 60000
+```
 
 ## The honest scorecard (proven / null / unmeasured — do NOT over-claim)
 - **Proven compression:** grammar ~32% (input), output ~55-77% lossless, end-to-end ~47-64% on a real
