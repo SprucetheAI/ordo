@@ -310,6 +310,27 @@ Extending the framework with two quality/safety gates, from the user's KLADDS ag
   Today `assistant_agentic` exhausts silently into a truncated answer with no loop-cause logged, and
   oscillation is only caught by the coarse 25-step ceiling (~24 wasted identical turns can burn first).
   Highest-value add: catches a stuck loop in ~3 reps. Flagged for a follow-up.
+
+## Capstone — evaluation gate + orchestration + the operating profile (2026-06-25)
+The three pieces that make ORDO a single full-fledged tool (compression + quality + creativity + speed +
+persistence), all honest-first.
+- **Evaluation gate** (`spec/evaluation-gate.md`): an `ultra-analytics`-style honest-judgment SOP,
+  generalized to technical/code artifacts, callable as a step. Debias law (judge the REAL goal, never the
+  prompt; a match to a weak brief is LOW); structure-over-cosmetics; **optimal-band law (10 ≠ the target —
+  over-engineering scores DOWN, the right-scoped 9 is optimal)**; honest pros AND caveats; reproducible.
+  **VALIDATED:** applied to {right-scoped, over-engineered, plausible-but-wrong} solutions it scored 9 / 3
+  / 0 — penalized over-engineering, refused to credit the plausible-wrong answer, withheld 10 from the
+  optimal one. The anti-sycophancy contract, working.
+- **Orchestration** (`spec/orchestration.md`): ledger-based multi-agent delegation — when to fan out,
+  the append-only ANCHOR/PROGRESS ledgers (state out of context, resumable), single-writer orchestrator,
+  **handoffs-as-pointers not payloads**, the approval queue, pipeline-vs-barrier, adversarial-verify, and
+  the git/file discipline. Codifies how this whole build was actually run.
+- **`OPERATING-PROFILE.md`** (1,442 tok, loadable as a system prompt / `CLAUDE.md`): the single spine that
+  ties the full stack — the honest stance (10≠optimal, debias, lossless-first), COMPRESS (readable-ORDO +
+  output contract + inbound), the 5 GATES (single/REFEED/experimentalist/evaluation/autonomy, classify
+  first), the 9 PILLARS, PERSISTENCE+multi-agent, CREATIVITY — plus **the honest scorecard** (proven vs
+  the NULLS we must never claim) and **the issues fixed this pass** (single entry-point, the eval SOP,
+  multi-agent codified, readable-canonical, the P3 honest gap, the loop-fingerprint follow-up).
 - **P7/P8 test-gate (measured, blind, 22 agents):** **P7 architecture** = `arch` directive +0.20
   (1.40→1.60 rebuild-vs-fix); reliably states a rebuild verdict + justification, lift concentrated where
   plain underperforms (the regex-HTML case), neutral where the model already re-architects or no
