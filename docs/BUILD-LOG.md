@@ -391,3 +391,31 @@ requests / auto-decodes ORDO / enforces the output contract, instead of relying 
 P3 = the skillstone (a single self-contained `ORDO.md` a user pastes into any LLM to teach it ORDO in
 one shot) + writing-system polish. Then the separate **harness** concept (the runtime that
 auto-encodes/decodes + the verbosity layer). The language itself (P0-P2) is now real and measured.
+
+## Competitive teardown → the 6 gap-fillers, shipped (2026-06-25)
+A 13-agent source-level teardown of 12 public repos (ccusage, rtk, andrej-karpathy-skills, graphify,
+obsidian-skills, codegraph, agentgraphed, context-mode, llmtrim, claude-code-router, claude-task-master,
+claude-code-templates), each cloned + read at the engine level and judged through ORDO's own evaluation gate
+(`docs/COMPETITIVE-TEARDOWN.md`). Result: 6 non-overlapping gap-fillers adopted, 6 overlapping layers refused
+(rtk/llmtrim/context-mode compressors duplicate the inbound layer + import quality loss; karpathy/obsidian are
+packaging exemplars not mechanisms; the installer/proxy products are whole products ORDO doesn't need). Plan in
+`docs/ADD-PLAN.md`. All six shipped, gate green at each step:
+- **P1 real cost/token/duration meter** (`tools/measure.mjs`, `ordo measure`): reads Anthropic's own
+  `usage.*` + timestamps from Claude Code's JSONL (lossless billed counts — triangulated by ccusage +
+  agentgraphed + claude-code-templates all reading the same fields), dedupe-keep-best, per-message-model
+  LiteLLM pricing with date-strip/family/prefix/default fallback. `pillars.py` P3 auto-upgrades PROXY→COMPUTED
+  once a paired A/B is recorded (`tools/measure-ab.json`) — honest, no over-claim.
+- **P2 `/ordo` packaging** (`skills/ordo/SKILL.md` + `.claude-plugin/{plugin,marketplace}.json` + `ordo init`):
+  the non-coder endgame — `/plugin marketplace add SprucetheAI/ordo` or `npx ordo init`, 3-tier progressive
+  disclosure with negative triggers. Lossless, additive; removes the paste-a-1.4k-file friction.
+- **P3 measured-revert gate** (`compressInbound` JS + `compress_inbound` Py + `spec/output.md` Part 4): every
+  transform re-measured, reverted if it doesn't strictly shrink (worst case = passthrough); lossy cuts gated by
+  `coverage_ok` (query-relevant terms must survive). Lossless-first as a mechanism, not a slogan.
+- **P4 code-context contract** (`spec/code-context.md`): AST-first/LLM-only-for-prose, token-budgeted render,
+  confidence-tagged edges; codegraph default / graphify multimodal as EXTERNAL providers. Navigation index, not
+  source.
+- **P5 decompose contract** (`spec/decompose.md`): lower-id-only DAG + per-node `testStrategy` +
+  complexity-gates-expansion + pure next-task picker. Format, not a trust model.
+- **P6 opt-in routing** (`resolveModel`): 5-signal cascade, default-strong, never auto-downgrade.
+- **18/18 node tests + Python self-checks green.** Rename Genjimusicbot → SprucetheAI. No foreign runtime
+  vendored; 5 of 6 are spec/packaging/one-script. **The discipline held: nothing lossy ships as a default.**

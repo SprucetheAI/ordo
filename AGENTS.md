@@ -24,14 +24,27 @@ the pillars, and the orchestration discipline.
 
 ## The runtime you can call (Node)
 ```js
-import { decode, emit, compressInbound, ponytailFlags, getSpec } from "ordo-llm";
+import { decode, emit, compressInbound, ponytailFlags, resolveModel, getSpec } from "ordo-llm";
 decode("σ文3列简");        // ORDO command -> full English instruction
 emit(data);                // cheapest faithful format
-compressInbound(doc);      // lossless inbound compression
+compressInbound(doc);      // lossless inbound compression (measured-revert: never inflates)
 ponytailFlags(text);       // filler the output contract forbids
+resolveModel(req, policy); // opt-in model routing (default-strong; null policy = never downgrade)
 getSpec("framework");      // load a gate's SOP as text
 ```
 The gates are SOPs you apply, not code that runs — `getSpec()` returns them as instructions.
+
+## CLI (for non-coders too)
+- `npx ordo init` — install the `/ordo` skill into this project's `.claude/` (then Claude Code loads it
+  automatically on coding/agentic tasks). Or `/plugin marketplace add SprucetheAI/ordo` → `/plugin install`.
+- `npx ordo measure` — the **real** cost/token/duration meter: reads Anthropic's own `usage.*` from Claude
+  Code's JSONL (lossless billed counts). Run it ORDO-on vs ORDO-off for the real A/B dollar delta.
+
+## Two more layers
+- **Code context** (`spec/code-context.md`): query a code-graph provider (codegraph/graphify) as a *navigation
+  index*; open the file for exact bytes; never trust an INFERRED edge as fact.
+- **Decompose** (`spec/decompose.md`): plan a multi-step job as a lower-id-only DAG with a per-node `testStrategy`;
+  the autonomy gate iterates the pure next-task picker.
 
 ## Honest limits
 GPT-tokenizer proxies (re-validate on your model); no proven wall-clock win; the glyph form is opt-in

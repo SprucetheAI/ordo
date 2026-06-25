@@ -38,10 +38,22 @@ Not the ~9 an over-eager reading of the operating profile would imply. The gap b
 - Commit the decode/quality eval harness + transcripts (reproducible, not just logged).
 - Measure the 20-prompt benchmark on a real Claude/Gemini tokenizer, not only `tiktoken`.
 - A long-context harness to move P10 (context-integrity) from GROUNDED to measured.
-- A real wall-clock timing harness to move P3 (speed) off proxy.
+- ~~A real wall-clock timing harness to move P3 (speed) off proxy.~~ → **BUILT:** `ordo measure` reads
+  Anthropic's own billed `usage.*` + timestamps from Claude Code's JSONL (lossless). P3 auto-upgrades
+  PROXY→COMPUTED once a paired ORDO-on/off A/B is recorded (`tools/measure-ab.json`). *Open:* run the A/B.
 - Make REFEED / evaluation callable as code (not only SOPs), or keep them honestly labeled as SOPs.
 
-The single most important thing the evaluator named — *close the honesty gap between "framework" and
-what executes* — is what this release does. ORDO is an honest research artifact with a small trustworthy
-runtime and one excellent finding (the compression is the grammar + output contract, not the glyphs); it
-is now packaged and labeled as exactly that, no more.
+## Post-eval additions (the competitive teardown, 2026-06-25)
+A source-level teardown of 12 public repos ([`COMPETITIVE-TEARDOWN.md`](COMPETITIVE-TEARDOWN.md)) found 6
+non-overlapping gap-fillers, now shipped (see [`ADD-PLAN.md`](ADD-PLAN.md)): the **real cost/token meter**
+(above), **`/ordo` packaging** (installable skill + `.claude-plugin` manifest, closes the "paste a 1.4k file
+by hand" adoption gap), the **measured-revert gate** (compression's lossless-first promise as a runtime
+mechanism, not a slogan), the **code-context** contract (`spec/code-context.md`), the **decompose** contract
+(`spec/decompose.md`), and **opt-in model routing** (`resolveModel`). The discipline held: no foreign runtime
+vendored, 5 of 6 are spec/packaging/one script, nothing lossy ships as a default. The teardown *refused* 6
+overlapping layers (rtk/llmtrim/context-mode compressors, the skill-packs, the installer/proxy products).
+
+The single most important thing the evaluator named — *close the honesty gap between "framework" and what
+executes* — is what this release does. ORDO is an honest research artifact with a small trustworthy runtime,
+one excellent finding (the compression is the grammar + output contract, not the glyphs), and now a real
+spend meter that lets anyone measure its dollar delta — packaged and labeled as exactly that, no more.

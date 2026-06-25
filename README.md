@@ -4,9 +4,9 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-c6f135.svg" alt="MIT"></a>
-  <img src="https://img.shields.io/badge/tests-11%2F11-79d65a.svg" alt="tests">
+  <img src="https://img.shields.io/badge/tests-18%2F18-79d65a.svg" alt="tests">
   <img src="https://img.shields.io/badge/honest-scorecard%20inside-9ee84a.svg" alt="honest">
-  <img src="https://img.shields.io/badge/install-paste%20%C2%B7%20npm%20%C2%B7%20CLAUDE.md-d9f64f.svg" alt="install">
+  <img src="https://img.shields.io/badge/install-%2Fordo%20plugin%20%C2%B7%20npm%20%C2%B7%20paste-d9f64f.svg" alt="install">
 </p>
 
 <p align="center"><b>fewer tokens · no context rot · higher-quality answers · no magic claims — the parts that don't work are named</b></p>
@@ -56,13 +56,17 @@ ORDO is **context-resident** — it works whenever it's *in the model's context*
 
 | Your setup | Do this | It procs… |
 |---|---|---|
-| **Claude Code / Cursor / IDE agent** | paste [`OPERATING-PROFILE.md`](OPERATING-PROFILE.md) (or [`CONTEXT-SAVER.md`](CONTEXT-SAVER.md)) into your **`CLAUDE.md`** / `.cursorrules` / project rules | **every session in that repo, automatically** |
+| **Claude Code (easiest — the `/ordo` endgame)** | `/plugin marketplace add SprucetheAI/ordo` → `/plugin install`, or `npx ordo init` in your project | the **`/ordo` skill auto-loads** on coding/agentic tasks — no pasting, no coding knowledge |
+| **Cursor / other IDE agent** | paste [`OPERATING-PROFILE.md`](OPERATING-PROFILE.md) (or [`CONTEXT-SAVER.md`](CONTEXT-SAVER.md)) into your **`CLAUDE.md`** / `.cursorrules` / project rules | every session in that repo, automatically |
 | **Chat (Claude.ai / ChatGPT)** | paste it into **Custom Instructions / Project knowledge**, or drop the raw GitHub URL and say "follow this" | every chat in that project |
-| **Terminal / your own code** | `npm install ordo-llm` for the runtime, or `npx ordo profile` to print the spec into a pipe | wherever you wire it |
+| **Terminal / your own code** | `npm install ordo-llm` for the runtime; `npx ordo profile` to pipe the spec; **`npx ordo measure`** for the real $/token A/B | wherever you wire it |
 
-**Does it need to be loaded / referenced / uploaded?** Loaded into context — once. The cleanest path is
-**putting it in `CLAUDE.md`** (or project knowledge), so it auto-loads on every chat and you never think
-about it again. Linking the GitHub repo to your LLM/IDE and pointing it at `OPERATING-PROFILE.md` is enough.
+**Does it need to be loaded / referenced / uploaded?** Loaded into context — once. On **Claude Code** the
+cleanest path is the **plugin** (`/plugin marketplace add SprucetheAI/ordo` → `/plugin install`) or
+`npx ordo init`: it drops the `/ordo` skill into `.claude/` and auto-loads on coding tasks, so a non-coder
+never pastes anything. Elsewhere, **put it in `CLAUDE.md`** (or project knowledge) and point your LLM/IDE at
+`OPERATING-PROFILE.md`. Want the real dollar proof? `npx ordo measure` reads your own session logs and reports
+actual tokens + cost — run it with ORDO on vs off for the A/B delta.
 
 ### Two lanes (start small)
 - **🟢 Lane 1 — Context Saver** ([`CONTEXT-SAVER.md`](CONTEXT-SAVER.md), ~1k tokens): *just* token-saving +
@@ -150,5 +154,7 @@ Xeno-runic, edgy but sanitary: near-black, one acid accent, sharp geometry, the 
 
 ## Honesty (the moat)
 [`DISCLAIMERS.md`](DISCLAIMERS.md) · [`VERDICT.md`](VERDICT.md) · [`docs/SELF-EVAL.md`](docs/SELF-EVAL.md)
-(ORDO graded by its own gate: 6.5/10, with the holes) · [`docs/BUILD-LOG.md`](docs/BUILD-LOG.md). A number
-counts only against its evidence tier. Private-use ethics: not for evading safety or monitoring. MIT.
+(ORDO graded by its own gate: 6.5/10, with the holes) · [`docs/BUILD-LOG.md`](docs/BUILD-LOG.md) ·
+[`docs/COMPETITIVE-TEARDOWN.md`](docs/COMPETITIVE-TEARDOWN.md) (12 rival repos torn down through the eval gate) ·
+[`docs/ADD-PLAN.md`](docs/ADD-PLAN.md) (the 6 gap-fillers that survived — all shipped). A number counts only
+against its evidence tier. Private-use ethics: not for evading safety or monitoring. MIT.

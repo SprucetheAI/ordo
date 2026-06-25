@@ -48,7 +48,8 @@ route a high-stakes plan through REFEED. `spec/decompose.md`.
 ## 3. THE PILLARS — what it optimizes (test-gated, scoreboard in `tools/pillars.py`)
 P1 context · P2 token-output · P3 speed · P4 quality · P5 hallucination · P6 tidyness · P7 architecture
 (rebuild-vs-fix) · P8 rework · P9 long-form/loop · P10 context-integrity (rot-resistance). Optimize all,
-lossless-first; a number that no gate produced does not count. **8/10 measured, P10 grounded.**
+lossless-first; a number that no gate produced does not count. **Tier-tagged in `tools/pillars.py`**
+(COMPUTED / AGENT-JUDGED / GROUNDED); P3 has a real meter now (`ordo measure`), P10 grounded.
 
 ## 4. PERSISTENCE + MULTI-AGENT — ledger orchestration (`spec/orchestration.md`)
 Fan out for breadth (>5 independent files), confidence (adversarial verify), or scale. Coordinate
@@ -87,8 +88,10 @@ route:
 - **Honest NULLS (never claim these):** single-word substitution ~1% (dead); exotic/glyph surface
   *inflates* tokens (GLOSSOPETRAE P1 null) and doesn't transfer to NL; epistemic markers show **no**
   confident-wrong reduction on a strong model (baseline at floor) though they don't backfire; **no
-  proven wall-clock speed win** — only an output-token proxy (P3).
+  proven wall-clock speed win** — only an output-token proxy (P3); the real $/token meter (`ordo measure`)
+  is built, the on/off A/B is unrecorded.
 - **Issues fixed this pass:** a single operating entry-point (this doc); the evaluation SOP (the gate);
-  multi-agent delegation codified (orchestration); readable-canonical coherence stated; P3 honest gap
-  flagged (needs a target endpoint to time). Residual: P3 unmeasured; the autonomy loop-fingerprint
-  guard is a real codebase gap (flagged as a follow-up).
+  multi-agent delegation codified (orchestration); readable-canonical coherence stated. **P3 meter BUILT**
+  (`ordo measure` reads real billed usage.*; record an A/B to upgrade PROXY→COMPUTED); the loop-fingerprint
+  guard SHIPPED. **6 competitive gap-fillers added** (measure / `/ordo` packaging / measured-revert /
+  code-context / decompose / routing) — `docs/ADD-PLAN.md`, `docs/COMPETITIVE-TEARDOWN.md`.

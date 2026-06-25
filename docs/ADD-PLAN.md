@@ -36,7 +36,7 @@ Missing-model rows WARN + exclude, never silently zero.
 
 ## Phase 2 — `/ordo` slash-command + installable skill packaging · **HIGHEST VALUE** (the non-coder endgame)
 **Build:** package `OPERATING-PROFILE.md` as a Claude Code **Agent Skill** + a `.claude-plugin` marketplace manifest,
-installable two ways — `/plugin marketplace add Genjimusicbot/ordo` → `/plugin install`, or one `npx ordo-llm init` that drops
+installable two ways — `/plugin marketplace add SprucetheAI/ordo` → `/plugin install`, or one `npx ordo-llm init` that drops
 `.claude/` files. Apply the **3-tier progressive disclosure** shape (obsidian-skills convention): a trigger-rich `description`
 with **negative triggers** ("fire when starting a coding/agentic task; do NOT fire for trivial one-line answers") always in
 context, the profile body on match, `spec/*.md` as on-demand `references/`.
@@ -142,7 +142,7 @@ most quality risk against the 10≠target / no-quality-loss discipline.
 ## The `/ordo` command vision
 A non-coder types `/ordo` (or installs it once) and gets the best Claude Code experience without understanding any of it. **Path:** ship
 `OPERATING-PROFILE.md` as a Claude Code Agent Skill behind a `.claude-plugin` marketplace manifest (the claude-code-templates / karpathy-skills
-distribution pattern), installable via `/plugin marketplace add Genjimusicbot/ordo` → `/plugin install`, or one `npx ordo-llm init`. **Strict 3-tier
+distribution pattern), installable via `/plugin marketplace add SprucetheAI/ordo` → `/plugin install`, or one `npx ordo-llm init`. **Strict 3-tier
 progressive disclosure** (obsidian-skills): an always-in-context `description` with explicit **negative triggers** so the gate never misfires; the
 profile body on match; the six gate specs + new `spec/code-context` + `spec/decompose` load only when that sub-task hits. Once installed, `/ordo`
 activates the whole stack — compress (grammar + output contract + inbound, now with the measured-revert gate), the six classify-first gates, the ten
