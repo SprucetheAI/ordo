@@ -283,6 +283,22 @@ policy-blocked by its own authors; conflicts with our DISCLAIMERS). `docs/glosso
   total tokens across all passes). Wins on HARD tasks (~3.4→1 passes); pure tax on easy (Kmax=1
   default). The disciplined antidote to brute-force token-furnace looping.
 - New pillar **P9 (long-form/loop quality)** added to `spec/pillars.md` + scoreboard (9 pillars now).
+
+## Two new gates — experimentalist (dual-perspective) + autonomy (2026-06-25)
+Extending the framework with two quality/safety gates, from the user's KLADDS agentic feed.
+- **Experimentalist gate** (`spec/experimentalist-gate.md`): repurposed the house `experimentalist`
+  divergence skill (frame win-condition → up to 5 genuinely-distinct approaches → adversarial score →
+  pick winner → graft) into a GENERALIZED, GATED dual-perspective mode for HARD coding tasks. Runs two
+  arms — gated-conventional (REFEED) ∥ experimentalist (divergent) — then SYNTHESIZES best-of-both and
+  acts. The gate (the integral decision) fires only on hard/advanced/real-fork tasks; deterministic
+  single-answer tasks skip it (divergence there is theatre). Coding divergence methods (invert-obvious,
+  change-paradigm, steal-from-far-field, remove-required, exaggerate, constraint-roulette, change-POV).
+  Test-gate running: does synthesized(conv+experimentalist) beat conventional-alone on hard forks?
+- **Autonomy gate** (`spec/autonomy.md`, in synthesis): a STRICT long-form agentic-autonomy framework
+  for hermes/openclaw-class agents — the autonomous loop + safety gates, error handling + recovery,
+  DESTRUCTION OF WRONGFUL LOOPS (no-progress/oscillation/thrashing/runaway detect-and-kill), decidable
+  termination, budgets with a hard kill, the approval queue for destructive side effects. Synthesized
+  from our docs (ADAPT ladder/termination, the strand approval-queue) + external research.
 - **P7/P8 test-gate (measured, blind, 22 agents):** **P7 architecture** = `arch` directive +0.20
   (1.40→1.60 rebuild-vs-fix); reliably states a rebuild verdict + justification, lift concentrated where
   plain underperforms (the regex-HTML case), neutral where the model already re-architects or no
