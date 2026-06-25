@@ -419,3 +419,26 @@ packaging exemplars not mechanisms; the installer/proxy products are whole produ
 - **P6 opt-in routing** (`resolveModel`): 5-signal cascade, default-strong, never auto-downgrade.
 - **18/18 node tests + Python self-checks green.** Rename Genjimusicbot → SprucetheAI. No foreign runtime
   vendored; 5 of 6 are spec/packaging/one-script. **The discipline held: nothing lossy ships as a default.**
+
+## Single-pass thinking protocol + the masterclass measurement (2026-06-25)
+After the GTM red-team (4/10 literal thesis), built `spec/thinking.md` — a complexity-adaptive SINGLE-PASS
+protocol (classifyTask LIGHT/STRICT dispatcher + 7 grounded 1× instincts: diction, verify-assert, goal-lock,
+reuse-replan, divergence-width, self-heal). Then **measured the instincts honestly** with blind A/Bs (separate
+arm-producers, separate blind judges, position decorrelated by item parity). The results are mixed, recorded in
+full — including the null and the negative:
+
+| instinct | blind A/B (6 items × 2 judges = 12 judgments) | net | tier | read |
+|---|---|---|---|---|
+| **goal-lock** | 8 win / 0 tie / 4 loss | **+4** | AGENT-JUDGED | directional WIN — re-derive-from-{goal+actual} beat blind plan-following. The one instinct with lift. |
+| **verify-assert** | 2 win / 8 tie / 2 loss | **0** | AGENT-JUDGED | WASH — mostly ties; the check rarely changed the answer on this set. No lift claim. |
+| **divergence** | 4 win / 1 tie / 7 loss | **−3** | AGENT-JUDGED | **NET NEGATIVE** — overturns the earlier n=4 "3/4" signal. A regression flag: width adds noise where the fork wasn't genuinely wide. **Claim withdrawn.** |
+| **classifyTask** | 36/36 inter-classifier agreement (12 items × 3) | 100% | AGENT-JUDGED | CONSISTENCY (rule-application reliability), NOT accuracy/misroute rate — no ground-truth labels. |
+
+**Honest caveats (none hidden):** same-model-family judging (self-preference risk), small-N (effective N ≈ the
+6/12 item count, no CI/p-value), constructed corpora (classifyTask's 100% may mean the items were unambiguous,
+not that routing is correct). **Nothing here is COMPUTED or proof.** The actionable finding is the divergence
+net-negative → the claim is withdrawn and the §8 move scope-narrowed; goal-lock banks a directional agent-judged
+win; verify-assert and diction stay (lossless + 1×) but claim no lift. P10 rot-retention harness built
+(`tools/rot_bench.py`, NoLiMa-style needle@lost-middle vs head-ledger), construction validated; P10 stays
+GROUNDED until a long-context run records `tools/rot-ab.json`. **The measurement that contradicted a prior
+claim is the system working as designed.**

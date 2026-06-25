@@ -261,7 +261,7 @@ So, out loud:
 - **No hallucination reduction** on a strong model — epistemic markers are null (no backfire); the single-pass verify-assert instinct reduces confident *commitment*, and the optional REFEED loop catches confident-wrong flaws at ~3.3× tokens — a *process*, not a measured factual-hallucination cut.
 - **Not "self-growing"** — the loop is human-run and evidence-gated (now with a cause-first self-heal + a lessons scoreboard), not an autonomous runtime.
 - **Not "fewest tokens, period"** — a lossy specialist beats the lossless stack on raw count.
-- **Creativity is narrow** — the divergence move helps on *hard forks only* (blind 3/4, n=4), and is difficulty-gated because width *degrades* easy tasks; it is not a general creativity lift. Quality / direction wins are blind agent-judged, small-N — directional leans, not computed proofs.
+- **Creativity is UNPROVEN** — a larger-N blind A/B *overturned* the early n=4 signal: the divergence move came out **net-negative** (4W/1T/7L), so the claim is **withdrawn** and the move scope-narrowed. The instinct that *did* show a directional blind win is **goal-lock** (8W/0T/4L, n=6, agent-judged); verify-assert was a wash. All small-N, same-model-family — directional, not proof ([`docs/BUILD-LOG.md`](docs/BUILD-LOG.md)).
 
 **What it IS:** the most compact *lossless* context stack on structured agentic work (−68%, stacked, reproducible),
 with real self-cleaning machinery and the nulls named. That version survives a skeptic — which is the whole point.

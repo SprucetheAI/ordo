@@ -137,8 +137,12 @@ fork / modal-answer-smells-generic → run the width move:
 4. Commit to ONE: usually the modal answer survives — say why the alternatives lost; when a divergent principle
    wins, graft it and ship one intentional plan.
 
-Escalate to the full 2-arm gate ONLY if the 1× move is genuinely undecided. Claim "helps divergence on hard
-forks" (blind-judged 3/4, n=4, small-N); NEVER "more creative across fields."
+Escalate to the full 2-arm gate ONLY if the 1× move is genuinely undecided. **HONEST STATUS — claim withdrawn:**
+a larger-N blind A/B (6 items × 2 judges) came out **net-negative** for the width move (4 win / 1 tie / 7 loss),
+overturning the earlier n=4 "3/4" signal. So the move is **unproven and tightened**: fire it ONLY when the modal
+answer is *demonstrably* generic/weak against the win-condition; **default to NOT diverging** (Snell's
+degradation rule applies even inside "hard" forks — width adds noise where the fork isn't genuinely wide). Claim
+nothing; treat width as a flag to investigate, never a validated win, and NEVER "more creative across fields."
 
 ## 9 · SELF-HEAL — on a failed gate, diagnose the CAUSE before regenerating (STRICT; the REFEED failure-branch)
 Belongs in `framework.md` under REFEED as the failure-branch router, not a new pass. Grounded in Reflexion's

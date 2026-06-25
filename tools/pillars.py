@@ -65,10 +65,33 @@ def _p3():
             "ordo measure (cost A/B → measure-ab.json) + node tools/clock.mjs (latency A/B → clock-ab.json)")
 
 
+def _p10():
+    """P10: the rot-retention harness is now BUILT (tools/rot_bench.py — NoLiMa-style needle@lost-middle NAIVE vs
+    needle@head-ledger ORDO). Upgrades GROUNDED->COMPUTED when a paired long-context run records tools/rot-ab.json
+    ({"naive": <accuracy>, "ordo": <accuracy>})."""
+    rb = ROOT / "tools" / "rot-ab.json"
+    if rb.exists():
+        try:
+            d = json.loads(rb.read_text(encoding="utf-8"))
+            return ("COMPUTED",
+                    f"rot retention A/B: ORDO {d['ordo']}% vs naive {d['naive']}% needle-retrieval on a rot-baited "
+                    "long context (tools/rot_bench.py)", "rot_bench NAIVE vs ORDO (tools/rot-ab.json)")
+        except Exception:
+            pass
+    return ("GROUNDED",
+            "the PROBLEM is measured by the literature (Chroma rot at ~50K on a 200K model; lost-in-the-middle "
+            "-20pp; RULER effective ~50-65pct; NoLiMa -58pp at 32K). The GATE = complexity-adaptive ledger + "
+            "compact-at-threshold (keep load-bearing at the edges, drop tool-output first, rehydrate via tests). "
+            "Harness BUILT (tools/rot_bench.py); record tools/rot-ab.json (NAIVE vs ORDO retrieval accuracy) to "
+            "upgrade GROUNDED->COMPUTED",
+            "rot_bench.py NAIVE-vs-ORDO retention (harness built; long-context run pending)")
+
+
 def scorecard():
     cut, flags = _ponytail_gate()
     p1, eng = _inbound_gate()
     p3_status, p3_value, p3_gate = _p3()
+    p10_status, p10_value, p10_gate = _p10()
     return [
         {"id": "P1", "name": "Context length (inbound)", "status": "COMPUTED",
          "value": f"lossless TSV {p1}% on structured (mixed corpus 45%); headroom 92% on redundant (lossy, gated)",
@@ -99,12 +122,7 @@ def scorecard():
                   "BLOCKER) at 3.3x token cost. NOT a token saver — a bug-catching/quality lever; net-positive only "
                   "where a latent bug exists (downstream bug-cost > 3.3x pass-cost); pure tax on already-correct tasks",
          "gate": "single-pass vs draft->critique->revise, blind quality + flaw count + token sum"},
-        {"id": "P10", "name": "Context integrity (rot-resistance)", "status": "GROUNDED",
-         "value": "the PROBLEM is measured by the literature (Chroma rot at ~50K on a 200K model; lost-in-the-middle "
-                  "-20pp; RULER effective ~50-65pct; NoLiMa -58pp at 32K). The GATE = complexity-adaptive ledger + "
-                  "compact-at-threshold (warn 70/flush 85/hard 90, drop tool-output first, keep load-bearing at the "
-                  "edges, rehydrate via the test gate). Mitigation efficacy needs a long-context harness to measure",
-         "gate": "accuracy-retention vs naive-stuffing on a NoLiMa-style long rot-baited run (needs harness)"},
+        {"id": "P10", "name": "Context integrity (rot-resistance)", "status": p10_status, "value": p10_value, "gate": p10_gate},
     ]
 
 
