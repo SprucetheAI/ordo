@@ -24,7 +24,7 @@ it: costs are GPT-tokenizer proxies; the tests ran on one frontier model; re-val
 | Hallucination | confident-wrong + calibration | **no backfire; better-calibrated abstention; no reduction at saturated baseline** | **C5 PASS (null on reduction, +calibration)** |
 | Intent-as-symbol macros | save/use + decode | **6.8 tok/use saved, decode 1.8/2** | **C7 PASS** |
 | Output format | tabular vs JSON | **TSV −55%; never pretty-print; YAML is a trap** | — |
-| Verbosity | ponytail (lossless) | **−77% on a chatty answer** | — |
+| Verbosity | ponytail (lossless) | **−71% (ab_smoke: 58→17 tok)** | — |
 | The harness | deterministic decode + output enforce | **8/8 tests green** | **C8 PASS** |
 
 ## The four findings that matter

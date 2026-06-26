@@ -3,25 +3,36 @@
 </div>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-c6f135.svg" alt="MIT"></a>
   <img src="https://img.shields.io/badge/tokens%20saved-47--68%25%20measured-c6f135.svg" alt="tokens saved 47-68% measured">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-c6f135.svg" alt="MIT"></a>
+  <img src="https://img.shields.io/badge/install-3%20tiers-d9f64f.svg" alt="install 3 tiers">
   <img src="https://img.shields.io/badge/tests-26%2F26-79d65a.svg" alt="tests">
   <img src="https://img.shields.io/badge/honest-scorecard%20inside-9ee84a.svg" alt="honest">
-  <img src="https://img.shields.io/badge/install-3%20tiers-d9f64f.svg" alt="install 3 tiers">
 </p>
 
-<p align="center"><b>Cut 47–68% of your Claude tokens, losslessly, the moment you mention it. Measured, not promised. The nulls are named.</b></p>
+<p align="center"><b>Cut 47–68% of your Claude tokens, losslessly, the moment you mention it. Every number is measured, and what didn't work is named too.</b></p>
 
 <p align="center">
   <a href="#three-ways-to-install">Install (3 tiers)</a> ·
-  <a href="#what-is-ordo">What</a> ·
+  <a href="#what-is-ordo">What it does</a> ·
   <a href="#it-runs-itself-auto-activation">Auto-activation</a> ·
   <a href="#architecture--the-stack">Architecture</a> ·
   <a href="#the-numbers">Numbers</a> ·
-  <a href="#honesty-the-moat">Honesty</a>
+  <a href="#honesty--the-receipts">Honesty</a>
 </p>
 
 ---
+
+Every Claude turn quietly wastes tokens you pay for: pretty-printed JSON, restated context, files re-read for the
+tenth time. ORDO strips that waste the moment you mention it, on autopilot, for the whole session. On real token
+counts a structured turn drops **47–68%, losslessly** — nothing summarized away or dumbed down, it just stops
+sending the filler.
+
+```bash
+npx ordo init          # Full: the whole layer, auto-applied
+npx ordo init --lean   # Lean: just save tokens
+# prompt-only, any model: paste OPERATING-PROFILE.md into your CLAUDE.md
+```
 
 ## Three ways to install
 
@@ -29,22 +40,14 @@
 |---|---|---|---|
 | **One line** | the discipline as a paste-in | token saving, nothing else | the whole layer that fixes the annoyances |
 | **Install** | paste [`OPERATING-PROFILE.md`](OPERATING-PROFILE.md) (or [`CONTEXT-SAVER.md`](CONTEXT-SAVER.md) for lean prose) into `CLAUDE.md` | `npx ordo init --lean` | `npx ordo init` (or `/plugin install`) |
-| **You get** | compression + the dispatcher as prose | format-by-shape + ponytail + inbound compaction, **measured −47–68%** | Lean **+** the classify→route dispatcher + the `/ordo` command + the gates (opt-in) + a **[last30days](https://github.com/mvanhorn/last30days-skill) social research (free tier) + web crawler + native PDF + video sight (ffmpeg→vision), all compaction-wrapped (−24–62%)** + `.ordo/` persistence that grows with the project |
+| **You get** | the discipline as instructions in your prompt | lower token bills, on autopilot (**−47–68%**, measured) | Lean **+** auto-routing + the `/ordo` command + opt-in quality gates + project memory that grows. *Plus the bonus tools Claude can't do alone, [see below](#the-full-tier-bonus--the-tools-claude-lacks).* |
 | **For** | "just put it in my prompt" | "I just want lower bills" | "the one install for all of it" |
-| **Footprint** | ~1k tokens, zero deps | tiny skill, zero MCP | a plugin + `/ordo` + the last30days skill (free tier) + `.ordo/mcp.json.example` |
+| **Footprint** | ~1k tokens, zero deps | tiny skill, zero MCP | a plugin + `/ordo` + `.ordo/` (optional: the last30days skill) |
 | **Proven** | compression (measured) | compression (measured) | compression + tool-compaction (both measured); the gates honest/opt-in |
 
-```bash
-npx ordo init          # Full — auto-router + gates + bundled tools + persistence
-npx ordo init --lean   # Lean — token saving only, as neat and light as caveman
-```
-
-**Lean is exactly that:** *only* the compacting + verbosity. No gates, no tools, no quality claims — the smallest
-thing that pays for itself, and the part with zero caveats. **Full is the superset:** everything in Lean, plus the
-auto-router, the gates (opt-in), and `.ordo/` persistence that grows with the project. The bundled tools Claude
-can't do alone ([last30days](https://github.com/mvanhorn/last30days-skill) socials, firecrawl web, native PDF,
-video sight) ride along as the bonus, each with its output compacted, which is the measured differentiator.
-Per-tier breakdown: [`docs/V2-ARCHITECTURE.md`](docs/V2-ARCHITECTURE.md) · [`docs/tiers/`](docs/tiers/).
+**Lean** saves tokens, nothing else, and it's the part with zero caveats. **Full** is Lean plus the auto-router,
+opt-in gates, project memory, and the [bonus tools](#the-full-tier-bonus--the-tools-claude-lacks) Claude can't do
+alone. Per-tier breakdown: [`docs/V2-ARCHITECTURE.md`](docs/V2-ARCHITECTURE.md) · [`docs/tiers/`](docs/tiers/).
 
 ## It runs itself (auto-activation)
 
@@ -59,34 +62,31 @@ The reason frameworks don't get used: you have to remember to invoke them. ORDO 
    start of a hard task and appends to as it works. That is "grows with the project" — concrete, a human-run
    evidence loop (not autonomous self-growth; we measured that null and named it).
 
-No memorization, no manual invocation, no drift back to raw Claude. As light to live with as caveman.
+No memorization, no manual invocation, no drift back to raw Claude. It adds almost nothing to live with: about 1k
+tokens, no daemon.
 
 ## What is ORDO
 
-Every Claude turn wastes tokens you pay for: pretty-printed JSON, restated context, "Great question!" preambles,
-files re-read for the tenth time. **ORDO strips that waste the moment you mention it**, on autopilot, for the whole
-session. On real token counts a structured turn drops **47–68%, losslessly** — nothing is summarized away or dumbed
-down, it just stops sending the filler.
+ORDO does **not** try to make Claude smarter. A frontier model already reasons well in one pass, and we measured
+that the usual "quality" tricks wash on it. We said so, out loud, in the scorecard. What it fixes is the token waste
+you saw above, plus what raw Opus with *no setup* gets wrong over real work: the goal drifting on a long task, and
+context rotting well before the window fills (Chroma clocks meaningful decay at **~50K tokens**). It keeps the goal
+in focus and compacts the context before the window starves, so it isn't re-reading the same files on turn ten. You
+set it up once; after that you just pay for fewer tokens.
 
-It does **not** try to make Claude smarter. A frontier model already reasons well in one pass, and we measured that
-the usual "quality" tricks wash on it (we named that out loud, in the scorecard). What it fixes is what raw Opus
-with *no setup* gets wrong over real work: the goal slipping out of focus on a long task, context rotting past
-**~50K tokens**, files read again and again. It keeps the goal at the front, compacts before the window starves,
-and reads things once. Set it once and forget it's there — you just pay for fewer tokens and the session stays sharp.
-
-> The **Full** tier also bundles what Claude can't do alone — read a video, research the socials, decode a PDF — and
-> compacts that output too. Real, and useful, but the bonus, not the point. [More on that below](#the-full-tier-bonus--the-tools-claude-lacks).
+> The **Full** tier also bundles what Claude can't do alone: read a video, research the socials, decode a PDF, and
+> it compacts that output too. Real and useful, but the bonus, not the point. [More on that below](#the-full-tier-bonus--the-tools-claude-lacks).
 
 Under it all is one rule: **spend effort proportional to the stakes, in a single pass.** ORDO sizes each task up
 first and only arms the heavy machinery (the ledger, goal-lock, replanning, the gates) when being wrong is actually
 expensive; easy tasks stay fast and terse. The gates fire **by exception, never by default**, and on a frontier
-model their quality lifts are **directional, not proven** (opt-in, named in the scorecard — the headline win is the
-token saving) ([`spec/thinking.md`](spec/thinking.md)).
+model their quality lifts are **directional, not proven**. They're opt-in and named in the scorecard; the headline
+win is the token saving ([`spec/thinking.md`](spec/thinking.md)).
 
-It's deliberately not hype. Every number is tagged **computed** (a script reproduces it), **agent-judged** (a blind
-test produced it), or **grounded** (a cited study). The repo even grades *itself* with its own evaluation gate and
-ships the **6.5/10** critique unedited ([`docs/SELF-EVAL.md`](docs/SELF-EVAL.md)), then ran the same gate on its own
-marketing and shipped that **4/10** too ([`docs/GTM-REALITY.md`](docs/GTM-REALITY.md)).
+Every number is tagged **computed** (a script reproduces it), **agent-judged** (a blind test produced it), or
+**grounded** (a cited study). The repo even grades *itself* with its own evaluation gate and ships the **6.5/10**
+critique unedited ([`docs/SELF-EVAL.md`](docs/SELF-EVAL.md)), then ran the same gate on its own marketing and
+shipped that **4/10** too ([`docs/GTM-REALITY.md`](docs/GTM-REALITY.md)).
 
 ## What ORDO is trying to solve
 
@@ -247,7 +247,7 @@ then **what ORDO actually measured**. We don't inherit their numbers — we cite
 | Project | Their claim | What ORDO takes | Our measured reality |
 |---|---|---|---|
 | [Headroom](https://github.com/headroomlabs-ai/headroom) | 60–95% fewer context tokens | inbound compaction | **92% on logs/tools** (shape-dependent; lossy+retrieval) |
-| Caveman (token-economy) | ~75% via terse register | the output verbosity register | **ponytail 77%, lossless** (operational; never on explainers) |
+| Caveman (token-economy) | ~75% via terse register | the output verbosity register | **ponytail 71%, lossless** (operational; never on explainers) |
 | [TOON](https://github.com/toon-format/toon) | 30–60% fewer than JSON | format-by-shape | **TSV −59%** on tabular (beats TOON in our bench) |
 | [LLMLingua (MSFT)](https://github.com/microsoft/LLMLingua) | up to 20× · +17% RAG | relevance / distractor removal | redundancy proof adopted; relevance-gate on roadmap |
 | [GLOSSOPETRAE (elder_plinius)](https://github.com/elder-plinius/GLOSSOPETRAE) | +36pp on hard tasks | the *structure*-composition insight (not the glyphs) | **quality ≥ English, 6-2-1 blind** |
@@ -311,7 +311,7 @@ not by any single ratio. A lossy specialist still uses fewer raw tokens, which i
 | headroom-only (lossy specialist) | −79% | ⚠ lossy |
 | ORDO + headroom (gated) | −86% | ⚠ lossy |
 
-### What ORDO does NOT claim (the moat is refusing the fallacy)
+### What ORDO does NOT claim
 We red-teamed our own pitch with 3 independent adversarial raters. The literal "improves almost everything" thesis
 scored **4/10** for laundering its own nulls; the scoped version **~8/10** ([`docs/GTM-REALITY.md`](docs/GTM-REALITY.md)).
 So, out loud:
@@ -322,7 +322,7 @@ So, out loud:
 - **Creativity is CUT, not just unproven** — the single-pass divergence move measured net-negative (4W/1T/7L); its generative half is **deleted** (it lacked the verifier+aggregator the science — Snell/MoA/Sakana — requires) and replaced by a one-line escalation flag. **goal-lock** is the one instinct with lift (8W/0T/4L), but the foolproof gate puts its 95% Wilson interval at **[0.39, 0.86] — straddling 0.5**, so it's *directional, not a win*, pending a cross-family rerun. Every ORDO number now passes an 11-point foolproof self-check ([`docs/IMPROVEMENT-CHARTER.md`](docs/IMPROVEMENT-CHARTER.md)).
 
 **What it IS:** the most compact *lossless* context stack on structured agentic work (−68%, stacked, reproducible),
-with real self-cleaning machinery and the nulls named. That version survives a skeptic — which is the whole point.
+with real self-cleaning machinery and the nulls named in the open.
 
 ## Inspired by (shoulders of giants)
 Headroom · Caveman · Ponytail · TOON · LLMLingua (Microsoft) · GLOSSOPETRAE (elder_plinius) · Lojban ·
@@ -334,7 +334,7 @@ what survives, name what doesn't.*
 Xeno-runic, edgy but sanitary: near-black, one acid accent, sharp geometry, the othala rune **ᛟ**
 (*order* — literally what "ordo" means) as the mark. Mascot in [`figures/`](figures/).
 
-## Honesty (the moat)
+## Honesty — the receipts
 [`DISCLAIMERS.md`](DISCLAIMERS.md) · [`VERDICT.md`](VERDICT.md) · [`docs/SELF-EVAL.md`](docs/SELF-EVAL.md)
 (ORDO graded by its own gate: 6.5/10, with the holes) · [`docs/BUILD-LOG.md`](docs/BUILD-LOG.md) ·
 [`docs/COMPETITIVE-TEARDOWN.md`](docs/COMPETITIVE-TEARDOWN.md) (12 rival repos torn down through the eval gate) ·
