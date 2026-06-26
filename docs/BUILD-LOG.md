@@ -420,6 +420,33 @@ packaging exemplars not mechanisms; the installer/proxy products are whole produ
 - **18/18 node tests + Python self-checks green.** Rename Genjimusicbot → SprucetheAI. No foreign runtime
   vendored; 5 of 6 are spec/packaging/one-script. **The discipline held: nothing lossy ships as a default.**
 
+## Improvement charter EXECUTED — the foolproof harnesses built (2026-06-26)
+Built everything the charter (`docs/IMPROVEMENT-CHARTER.md`) designed; ran the one that lands COMPUTED now:
+- **`tools/judge.py`** — the 5-lock foolproof judge protocol. Stats (Wilson interval, sign-test, Cohen's κ,
+  position-swap, panel-majority, cross-family lock) tested cold. Run on goal-lock's own 8W/0T/4L → Wilson
+  **[0.391, 0.862] straddles 0.5 → DIRECTIONAL, not a WIN.** The gate demotes the favorite — the un-gameable property.
+- **`tools/route_truth.py` + `route_corpus.jsonl`** (36 outcome-pinned items, 12 adversarial both directions,
+  content-hash 7a34cc3e) — the classifyTask misroute-cost harness, **COMPUTED, zero API. Real result:**
+  | router | over-spend% | under-verify% | irrev-floor | cost |
+  |---|---|---|---|---|
+  | ordo_rule (gold signals) | 0% | 0% | 0 | 0 |
+  | keyword_router (no-model) | 6% | 16% | 2 | 31 |
+  | length_router (strawman) | 6% | 79% | 10 | 151 |
+  | always_strict | 100% | 0% | 0 | 17 |
+  Findings: the **5-trigger taxonomy is complete** (0 misroute given correct signals); the HARD part is extraction
+  — a naive keyword extractor (cost 31) is **worse than always-strict (cost 17)** because under-verify is 10× costlier,
+  so the real classifyTask must drive under-verify near 0 to justify itself. The model-extraction number is PENDING;
+  the "100% consistency" headline is withdrawn (BUILD-LOG open item #3 closed).
+- **`tools/trap_corpus.py`** (8 planted-misleader items, 4 zones) — the verify-assert harness with deterministic
+  oracles + the **baseline-fails-first entry gate** (admits only items the baseline fails ≥2/3, killing the 8-tie
+  wash by construction) + McNemar. Tested cold; the A/B (arm-A vs arm-B completions) is PENDING model calls → COMPUTED.
+- **`tools/goal_lock_bench.py`** (5 construction-validated divergence items) — A=follow-plan vs B=re-derive,
+  tier-one exact-match COMPUTED + tier-two cross-family judge. Its construction-validator **caught a real bug in my
+  own corpus** (a ground-truth that echoed the stale-plan noun) before it could ship — the kill-clause working on itself.
+The subtraction held: divergence's generative half deleted (§8 → escalation flag), 3 instincts kept as honest
+process with no claim, goal-lock de-headlined to directional until the cross-family rerun. Every number prints at
+its true tier or stays PENDING. 24/24 node + 5 Python self-checks green.
+
 ## Single-pass thinking protocol + the masterclass measurement (2026-06-25)
 After the GTM red-team (4/10 literal thesis), built `spec/thinking.md` — a complexity-adaptive SINGLE-PASS
 protocol (classifyTask LIGHT/STRICT dispatcher + 7 grounded 1× instincts: diction, verify-assert, goal-lock,
