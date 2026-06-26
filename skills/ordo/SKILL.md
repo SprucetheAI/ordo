@@ -35,6 +35,9 @@ width degrades easy tasks), cause-first self-heal on a failed gate. Routes effor
   (cut preamble/restate/closer/meta, lossless); caveman register on *operational* text only, never explainers. `references/output.md`.
 - **Inbound:** compress what the model reads — lossless-first; **every transform is re-measured and reverted if it
   doesn't reduce tokens** (worst case = passthrough). For a lossy cut, a coverage check must also pass. `references/output.md`.
+- **Tool output (the bundled-MCP value-add):** route EVERY tool result — a video transcript, a web/social crawl, a
+  PDF dump, any tool — through the inbound compactor before it enters context. Measured **−24 to −62%** on tool
+  output (`references/mcp-bundle.md`). The tools aren't ORDO's; compacting them is.
 - **Code context:** prefer an AST graph (structure parsed free, never burns tokens) as a *navigation index* — open
   the file for exact bytes; never trust an INFERRED edge as fact. `references/code-context.md`.
 

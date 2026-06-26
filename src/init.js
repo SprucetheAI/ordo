@@ -29,6 +29,17 @@ const LESSONS_TEMPLATE = `# ORDO lessons (evidence-gated — appended ONLY after
 This is a human-run, evidence-gated loop — NOT autonomous self-growth.>
 `;
 
+// The bundled-MCP template (NOT active — rename to .mcp.json + add your keys to enable). ORDO's value-add is
+// routing each tool's output through the inbound compactor (spec/mcp-bundle.md). PDFs/images are native to Claude
+// Code (the Read tool); video has no standard server yet — add one to the "video" slot when you have it.
+const MCP_EXAMPLE = JSON.stringify({
+  _README: "Rename to .mcp.json and add your keys to enable. ORDO compacts every tool's output (spec/mcp-bundle.md).",
+  mcpServers: {
+    firecrawl: { command: "npx", args: ["-y", "firecrawl-mcp"], env: { FIRECRAWL_API_KEY: "<your-key>" } },
+    "video (add your video-understanding MCP here)": { command: "npx", args: ["-y", "<video-mcp-package>"], env: {} },
+  },
+}, null, 2) + "\n";
+
 /** Install ORDO into <targetDir or cwd>/.claude/. opts.lean → the compaction-only tier. Returns a status string. */
 export function initProject(targetDir, opts = {}) {
   const target = targetDir || process.cwd();
@@ -57,8 +68,10 @@ export function initProject(targetDir, opts = {}) {
   mkdirSync(ordoDir, { recursive: true });
   if (!existsSync(join(ordoDir, "ledger.md"))) writeFileSync(join(ordoDir, "ledger.md"), LEDGER_TEMPLATE);
   if (!existsSync(join(ordoDir, "lessons.md"))) writeFileSync(join(ordoDir, "lessons.md"), LESSONS_TEMPLATE);
+  if (!existsSync(join(ordoDir, "mcp.json.example"))) writeFileSync(join(ordoDir, "mcp.json.example"), MCP_EXAMPLE);
 
   return `ORDO Full installed → ${skillDir}\n  SKILL.md + OPERATING-PROFILE.md + ${n} spec references + ` +
-    ".ordo/ (ledger + lessons — grows with the project).\n" +
-    "  Auto-fires + auto-routes on coding/agentic tasks. Restart the session to pick it up.";
+    ".ordo/ (ledger + lessons + mcp.json.example — grows with the project).\n" +
+    "  Auto-fires + auto-routes on coding/agentic tasks. Bundled-tool output is compaction-wrapped (spec/mcp-bundle.md).\n" +
+    "  Restart the session to pick it up.";
 }
