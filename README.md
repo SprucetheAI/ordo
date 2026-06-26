@@ -84,7 +84,7 @@ Three problems every heavy LLM user hits:
   model degrades meaningfully at **~50K tokens**, even on trivial tasks. [Lost in the Middle](https://arxiv.org/abs/2307.03172):
   the middle of a long context can score **below** sending no context at all. [NoLiMa](https://arxiv.org/abs/2502.05167)
   (ICML 2025): Claude 3.5 dropped **−57.8pp** at 32K once retrieval needed reasoning, not keyword matching.
-  Bigger windows don't fix this — *cleaner* context does. **That's why a context limiter makes your LLM smarter.**
+  Bigger windows don't fix this — *cleaner* context does. **A context limiter is a quality lever, not just a cost one** (grounded; our mitigation's own efficacy is harness-pending, named in the scorecard).
 - **Token waste.** Pretty-printed JSON, restated context, "Great question!" preambles, re-read files. The
   output and the inbound are mostly recoverable filler.
 - **Vibe-coded answers.** The first plausible draft ships a bug, or over-engineers, or quietly bends the
@@ -132,14 +132,11 @@ never pastes anything. Elsewhere, **put it in `CLAUDE.md`** (or project knowledg
 `OPERATING-PROFILE.md`. Want the real dollar proof? `npx ordo measure` reads your own session logs and reports
 actual tokens + cost — run it with ORDO on vs off for the A/B delta.
 
-### Two lanes (start small)
-- **🟢 Lane 1 — Context Saver** ([`CONTEXT-SAVER.md`](CONTEXT-SAVER.md), ~1k tokens): *just* token-saving +
-  rot resistance. No language, no gates. This is the "makes your LLM smarter" core. **Start here.**
-- **⚫ Lane 2 — Full framework** ([`OPERATING-PROFILE.md`](OPERATING-PROFILE.md), ~1.4k tokens): the lot —
-  the compression layers, the quality/autonomy gates, the 10 pillars.
-- **🔤 The ORDO language is opt-in, off by default.** The terse command grammar (`σ文3列简` →
-  "summarize the following in 3 concise bullets…") is a power-user add-on, not required. Most of the value
-  is the output + context discipline, which is plain English. Turn the language on with `ORDO.md`.
+### The language is opt-in (off by default)
+The terse command grammar (`σ文3列简` → "summarize the following in 3 concise bullets…") is a power-user add-on,
+not required. Most of the value is the output + context discipline, which is plain English. Turn the language on
+with `ORDO.md`. The **install tiers above** (Lean / Full) are the main path; the paste-in spines are
+[`CONTEXT-SAVER.md`](CONTEXT-SAVER.md) (lean) and [`OPERATING-PROFILE.md`](OPERATING-PROFILE.md) (full).
 
 ```bash
 npm install ordo-llm

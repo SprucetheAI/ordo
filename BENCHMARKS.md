@@ -15,7 +15,9 @@ target model.
 | inbound (lossless built-in) | JSON→TSV ~72%, prose-whitespace ~33% | `python tools/pillars.py` (P1 gate) |
 | ponytail filler-cut | ~67-77% on a chatty answer (lossless) | `python tools/pillars.py` (P2 gate) |
 | full-pipeline blend (modeled) | ~47% realistic turn, ~88% log-heavy, ~13% prose-heavy | `python tools/pipeline_recalc.py` |
-| runtime decode + output contract | **11/11 tests** | `npm test` ; `python harness/test_ordo.py` |
+| runtime + classifier + installer + harness stats | **26/26 tests** | `npm test` ; `python harness/test_ordo.py` |
+| bundled-tool output compaction (Full tier) | crawl −62%, transcript −46%, PDF −24% (lossless) | `python tools/mcp_compact_ab.py` |
+| classifyTask misroute (deterministic) | 5-trigger taxonomy complete; extraction is the open number | `python tools/route_truth.py` |
 
 ## AGENT-JUDGED (blind multi-agent, recorded in BUILD-LOG)
 | metric | result |

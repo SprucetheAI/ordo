@@ -1,7 +1,7 @@
 {
   "name": "ordo-llm",
-  "version": "0.1.0",
-  "description": "A measured, honest context-engineering framework for LLMs: a terse command grammar + an output-discipline contract + quality/autonomy gates. Runtime (decode/format/inbound) plus a paste-in operating spec. No magic claims; an honest scorecard ships with it.",
+  "version": "0.2.0",
+  "description": "The auto-applied agent layer: mention it once and it compresses your tokens losslessly (measured -47-68%), bundles the tools Claude lacks (video/PDF/crawler, compaction-wrapped), and grows with the project. Three install tiers (paste-in / lean / full). Honest-first: every claim measured, the nulls named.",
   "type": "module",
   "main": "src/index.js",
   "exports": { ".": "./src/index.js" },

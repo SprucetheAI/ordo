@@ -14,11 +14,13 @@
 - src/index.js: decode(), emit()/bestFormat(), compressInbound() (measured-revert), ponytailFlags(), resolveModel(), classifyTask(), getSpec().
 - tools/measure.mjs: real cost/token/duration meter from Claude Code's own JSONL usage.* (lossless billed counts).
 - tools/clock.mjs: wall-clock latency harness (the path to EARN "faster"; cut until clock-ab.json records a paired win).
-- `npm install ordo-llm` ; `npx ordo measure` ; `npx ordo init` ; `npm test` (24/24).
-- Install for non-coders: `/plugin marketplace add SprucetheAI/ordo` → `/plugin install`, or `npx ordo init`.
+- tools/route_truth.py + trap_corpus.py + goal_lock_bench.py + judge.py + mcp_compact_ab.py: the foolproof A/B harnesses (charter §; docs/IMPROVEMENT-CHARTER.md).
+- `npm install ordo-llm` ; `npx ordo measure` ; `npx ordo init` (full) ; `npx ordo init --lean` ; `npm test` (26/26).
+- THREE install tiers (docs/V2-ARCHITECTURE.md): ordo.md (paste-in) · ORDO Lean (`init --lean`, compaction only) · ORDO Full (`init`, + dispatcher + gates + bundled MCPs + .ordo/ persistence).
 
 ## Methodology (prompt SOPs — text, not code)
-- spec/thinking.md (the single-pass dispatcher: classify LIGHT/STRICT → route effort; diction, verify-assert, goal-lock, reuse-replan, divergence-width, self-heal).
+- spec/thinking.md (the single-pass dispatcher: classify LIGHT/STRICT → route effort; diction, verify-assert, goal-lock, reuse-replan, self-heal; divergence is a FLAG that escalates to the experimentalist gate, its generative half cut).
+- spec/mcp-bundle.md (Full tier: bundle video/PDF/crawler MCPs, compact their output, measured −24–62%).
 - spec/framework.md (REFEED loop + self-heal failure-branch), spec/experimentalist-gate.md, spec/evaluation-gate.md,
   spec/autonomy.md, spec/context-rot.md, spec/orchestration.md.
 - spec/code-context.md (code-graph contract: AST-first, budgeted render, confidence-tagged edges).
