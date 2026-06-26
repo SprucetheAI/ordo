@@ -61,12 +61,15 @@ No memorization, no manual invocation, no drift back to raw Claude. As light to 
 
 ## What is ORDO
 
-ORDO is the **auto-applied agent layer** you give your LLM. Set it once and it does three *proven* things:
-**compresses** what goes in and out so you pay for fewer tokens (measured **−47–68%**), **bundles the tools Claude
-lacks** (crawler + native PDF + a video slot) and **compacts their output**, and **fights context rot** so a long
-session stays accurate. It also ships quality gates (REFEED, evaluation, autonomy…) as **opt-in discipline** —
-honestly tiered, because on a frontier model they mostly *wash*, so they are not the headline. It ships as a
-**paste-in spec** (load it into your system prompt / `CLAUDE.md`)
+ORDO is the **auto-applied agent layer** you give your LLM. It does **not remodel how Claude thinks** — a frontier
+model already reasons well in a single pass. It **fills the gaps of raw Opus with no setup**: a strong `CLAUDE.md`,
+compaction, the goal held at the front, context + long-form management, read-files-once discipline. Set it once and
+it does three *proven* things: **compresses** in and out so you pay for fewer tokens (measured **−47–68%**),
+**bundles the tools Claude lacks** (crawler + social + native PDF + video sight) and **compacts their output**, and
+**holds a long session together** — goal-lock + a ledger + rot-compaction so the work doesn't drift or rot past
+~50K. The gains are in **context and long-form** (grounded in the rot literature); it does *not* claim a
+hallucination or IQ boost (those wash on a strong model — honestly named). It ships as a **paste-in spec**
+(load it into your system prompt / `CLAUDE.md`)
 plus a thin **npm runtime** for the deterministic bits.
 
 Under all of it is one law: **spend effort proportional to the stakes, in a single pass.** ORDO classifies each

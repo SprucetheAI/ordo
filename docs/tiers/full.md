@@ -13,9 +13,11 @@ Drops `.claude/skills/ordo/SKILL.md` + the operating profile + 16 gate-spec refe
 ## What you get (on top of Lean)
 - **Auto-router** — `classifyTask()` decides which part fires per task (light → just compress; hard → arm the
   ledger + the right gate). You never pick.
-- **The gates (opt-in, honest)** — REFEED / experimentalist / evaluation / autonomy / context-rot, classify-first.
-  *Honestly tiered:* on a frontier model the single-pass instincts mostly **wash** (measured, named in the
-  scorecard) — they help where you're under-resourced or on specific traps, and stay off by default.
+- **The gates + long-form discipline (opt-in, honest)** — REFEED / experimentalist / evaluation / autonomy /
+  context-rot, classify-first. *ORDO fills raw-Opus gaps, it doesn't remodel.* The SHORT-task quality lifts **wash**
+  on a frontier model (measured) — but the real value is **long-form / context**: goal-lock over a session + the
+  ledger + rot-compaction hold the goal at the front and survive context rot past ~50K (grounded in the rot
+  literature — the actual raw-Opus gap). Off by default; opt-in.
 - **Bundled tools, compaction-wrapped (the differentiator):** a web **crawler** (firecrawl) + **social scraper**
   (apify), Claude Code's **native PDF**, and **video sight** (ffmpeg keyframes → native image vision via
   `tools/video_frames.py` — no fake MCP). The value-add is **compacting every tool's output**: crawl **−62%**,
