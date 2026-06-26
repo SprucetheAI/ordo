@@ -40,7 +40,8 @@ Opt-out-able. Honest tier: the instinct lifts are DIRECTIONAL/wash on a frontier
   PDF dump, any tool — through the inbound compactor before it enters context. Measured **−24 to −62%** on tool
   output (`references/mcp-bundle.md`). The tools aren't ORDO's; compacting them is.
 - **See a video:** extract keyframes (`tools/video_frames.py`, ffmpeg) → Read them as images (native vision) →
-  ponytail the per-frame notes. PDFs/images are native; crawler = firecrawl; socials = apify.
+  ponytail the per-frame notes. PDFs/images native; web crawl = firecrawl; socials/recent = the **last30days** skill
+  (`/last30days <topic>`, free tier, multi-source) — compact its output.
 - **Orchestrate other skills:** when a house skill (ultra-design, ultra-video, …) is installed, route to it and
   **compact its output** — ORDO is the routing + compaction layer *over* your skills, never a replacement.
 - **Code context:** prefer an AST graph (structure parsed free, never burns tokens) as a *navigation index* — open

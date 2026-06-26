@@ -28,9 +28,9 @@
 |---|---|---|---|
 | **One line** | the discipline as a paste-in | token saving, nothing else | the whole layer that fixes the annoyances |
 | **Install** | paste [`OPERATING-PROFILE.md`](OPERATING-PROFILE.md) (or [`CONTEXT-SAVER.md`](CONTEXT-SAVER.md) for lean prose) into `CLAUDE.md` | `npx ordo init --lean` | `npx ordo init` (or `/plugin install`) |
-| **You get** | compression + the dispatcher as prose | format-by-shape + ponytail + inbound compaction, **measured −47–68%** | Lean **+** the classify→route dispatcher + the `/ordo` command + the gates (opt-in) + a **web crawler + social scraper + native PDF + video sight (ffmpeg frames → native vision), all compaction-wrapped (−24–62%)** + `.ordo/` persistence that grows with the project |
+| **You get** | compression + the dispatcher as prose | format-by-shape + ponytail + inbound compaction, **measured −47–68%** | Lean **+** the classify→route dispatcher + the `/ordo` command + the gates (opt-in) + a **[last30days](https://github.com/mvanhorn/last30days-skill) social research (free tier) + web crawler + native PDF + video sight (ffmpeg→vision), all compaction-wrapped (−24–62%)** + `.ordo/` persistence that grows with the project |
 | **For** | "just put it in my prompt" | "I just want lower bills" | "the one install for all of it" |
-| **Footprint** | ~1k tokens, zero deps | tiny skill, zero MCP | a plugin + `/ordo` + `.ordo/mcp.json.example` (firecrawl + apify) |
+| **Footprint** | ~1k tokens, zero deps | tiny skill, zero MCP | a plugin + `/ordo` + the last30days skill (free tier) + `.ordo/mcp.json.example` |
 | **Proven** | compression (measured) | compression (measured) | compression + tool-compaction (both measured); the gates honest/opt-in |
 
 ```bash
@@ -39,10 +39,11 @@ npx ordo init --lean   # Lean — token saving only, as neat and light as cavema
 ```
 
 **Lean is exactly that:** *only* the compacting + verbosity. No gates, no tools, no quality claims — the smallest
-thing that pays for itself. **Full is the superset:** a web **crawler** (firecrawl) + **social scraper** (apify),
-Claude Code's **native PDF**, **video sight** (ffmpeg keyframes → native image vision — `tools/video_frames.py`,
-no fake MCP), and it **compacts every tool's output** (the measured differentiator), and it grows with the
-project. Per-tier breakdown: [`docs/V2-ARCHITECTURE.md`](docs/V2-ARCHITECTURE.md) · [`docs/tiers/`](docs/tiers/).
+thing that pays for itself. **Full is the superset:** **[last30days](https://github.com/mvanhorn/last30days-skill)**
+social/recent research across Reddit/X/YouTube/TikTok/IG/HN/GitHub (free tier, scored by upvotes/likes/real-money) +
+a web **crawler** (firecrawl) + Claude Code's **native PDF** + **video sight** (ffmpeg keyframes → native image
+vision — `tools/video_frames.py`, no fake MCP), and it **compacts every tool's output** (the measured
+differentiator), and it grows with the project. Per-tier breakdown: [`docs/V2-ARCHITECTURE.md`](docs/V2-ARCHITECTURE.md) · [`docs/tiers/`](docs/tiers/).
 
 ## It runs itself (auto-activation)
 

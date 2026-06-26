@@ -12,10 +12,15 @@ context.** A transcript or a crawl arrives already shrunk. *That compaction is t
 | PDF text dump (prose) | **−24%** (whitespace; deep dedup is the opt-in headroom path) |
 
 ## The anchor tools (the Full install ships `.ordo/mcp.json.example`)
-- **Web crawler** — `firecrawl-mcp` (real; needs `FIRECRAWL_API_KEY`) crawls the open web. Results →
-  `compressInbound` (JSON→TSV, dedup) before context.
-- **Social media** — `@apify/actors-mcp-server` (real; needs `APIFY_TOKEN`) scrapes the largest socials (X /
-  Instagram / TikTok / LinkedIn / etc. via Apify actors). Results → compacted before context.
+- **Social media + recent research (the recommended path)** —
+  **[last30days](https://github.com/mvanhorn/last30days-skill)** (MIT, mature v3.8.x): a slash-command *skill* that
+  researches any topic across Reddit · X · YouTube · TikTok · Instagram · Hacker News · GitHub · Polymarket + more,
+  scored by upvotes / likes / real money — not editors. **Free tier** (ScrapeCreators GitHub signup = 10,000 free
+  calls); several sources work key-light. Install it alongside ORDO (`npx skills add .` or `/plugin install`), then
+  `/last30days <topic>`; **ORDO compacts its multi-source output** (result JSON → TSV, dedup) before it hits the
+  window. This is the "largest social medias" answer — a key-light, multi-source skill, not a paid single-API scraper.
+- **Web crawler (raw pages)** — `firecrawl-mcp` (needs `FIRECRAWL_API_KEY`) for arbitrary open-web crawl when you
+  need raw page content rather than ranked social research. Results → `compressInbound` (JSON→TSV) before context.
 - **PDF / images** — **native to Claude Code** (the Read tool reads PDFs + images). ORDO adds: route the extracted
   text through the inbound compactor; for a huge PDF keep the load-bearing pages, reference the rest.
 - **Video / mp4 (vision)** — ORDO does video the **REAL way, no fake MCP**: `tools/video_frames.py` extracts

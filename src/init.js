@@ -29,15 +29,14 @@ const LESSONS_TEMPLATE = `# ORDO lessons (evidence-gated — appended ONLY after
 This is a human-run, evidence-gated loop — NOT autonomous self-growth.>
 `;
 
-// The bundled-MCP template (NOT active — rename to .mcp.json + add your keys to enable). ORDO's value-add is
-// routing each tool's output through the inbound compactor (spec/mcp-bundle.md). firecrawl = open web, apify =
-// social scraping. VIDEO uses tools/video_frames.py (ffmpeg keyframes → native image vision, no MCP). PDFs/images
-// are native to Claude Code (the Read tool).
+// The bundled-tools template. ORDO's value-add is routing each tool's output through the inbound compactor
+// (spec/mcp-bundle.md). SOCIAL/recent: install the last30days SKILL (`npx skills add` / `/plugin install`) — free
+// tier, multi-source (Reddit/X/YouTube/TikTok/IG/HN/GitHub...), then /last30days <topic>; ORDO compacts its output.
+// WEB (raw pages): firecrawl below. VIDEO: tools/video_frames.py (ffmpeg keyframes → native vision). PDFs/images: native.
 const MCP_EXAMPLE = JSON.stringify({
-  _README: "Rename to .mcp.json + add keys to enable. ORDO compacts every tool's output (spec/mcp-bundle.md). VIDEO: tools/video_frames.py (ffmpeg keyframes → native vision, no MCP). PDFs/images: native (Read tool).",
+  _README: "Rename to .mcp.json + add keys to enable. ORDO compacts every tool's output (spec/mcp-bundle.md). SOCIAL/recent: install the last30days skill (github.com/mvanhorn/last30days-skill, free tier) -> /last30days <topic>. VIDEO: tools/video_frames.py. PDFs/images: native (Read tool).",
   mcpServers: {
     firecrawl: { command: "npx", args: ["-y", "firecrawl-mcp"], env: { FIRECRAWL_API_KEY: "<your-firecrawl-key>" } },
-    apify: { command: "npx", args: ["-y", "@apify/actors-mcp-server"], env: { APIFY_TOKEN: "<your-apify-token>" } },
   },
 }, null, 2) + "\n";
 

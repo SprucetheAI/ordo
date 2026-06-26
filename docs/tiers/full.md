@@ -18,10 +18,11 @@ Drops `.claude/skills/ordo/SKILL.md` + the operating profile + 16 gate-spec refe
   on a frontier model (measured) — but the real value is **long-form / context**: goal-lock over a session + the
   ledger + rot-compaction hold the goal at the front and survive context rot past ~50K (grounded in the rot
   literature — the actual raw-Opus gap). Off by default; opt-in.
-- **Bundled tools, compaction-wrapped (the differentiator):** a web **crawler** (firecrawl) + **social scraper**
-  (apify), Claude Code's **native PDF**, and **video sight** (ffmpeg keyframes → native image vision via
-  `tools/video_frames.py` — no fake MCP). The value-add is **compacting every tool's output**: crawl **−62%**,
-  transcript **−46%**, PDF **−24%** (measured, `python tools/mcp_compact_ab.py` → `tools/mcp-compact-ab.json`). See
+- **Bundled tools, compaction-wrapped (the differentiator):** **[last30days](https://github.com/mvanhorn/last30days-skill)**
+  for social/recent research (Reddit/X/YouTube/TikTok/IG/HN/GitHub, free tier) + a web **crawler** (firecrawl) +
+  Claude Code's **native PDF** + **video sight** (ffmpeg keyframes → native image vision via `tools/video_frames.py`
+  — no fake MCP). The value-add is **compacting every tool's output**: crawl **−62%**, transcript **−46%**, PDF
+  **−24%** (measured, `python tools/mcp_compact_ab.py` → `tools/mcp-compact-ab.json`). See
   [`../../spec/mcp-bundle.md`](../../spec/mcp-bundle.md).
 - **Persistence that grows with the project** — the skill reads `.ordo/ledger.md` (goal + decisions) at the start
   of a hard task and appends as it works; lessons accrete to `.ordo/lessons.md`. A human-run evidence loop —
