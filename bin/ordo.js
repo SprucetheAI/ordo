@@ -1,10 +1,13 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { decode, emit, ponytailFlags, compressInbound, getOperatingProfile, getSkillstone } from "../src/index.js";
 import { measure, render } from "../tools/measure.mjs";
+import { track, report, renderReport, reset } from "../tools/savings.mjs";
 import { initProject } from "../src/init.js";
 
 const [cmd, ...args] = process.argv.slice(2);
 const arg = args.join(" ");
+const stdin = () => { try { return readFileSync(0, "utf8"); } catch { return ""; } };
 
 switch (cmd) {
   case "decode": console.log(decode(arg)); break;
@@ -14,6 +17,13 @@ switch (cmd) {
   case "profile": case "spec": console.log(getOperatingProfile()); break;
   case "skillstone": console.log(getSkillstone()); break;
   case "measure": { const di = args.indexOf("--dir"); console.log(render(measure(di >= 0 ? args[di + 1] : undefined), args.includes("--json"))); break; }
+  case "savings": {
+    const sub = args[0];
+    if (sub === "track") { const text = args.slice(1).filter((a) => !a.startsWith("--")).join(" ") || stdin(); const r = track(text); console.log(`tracked: ${r.before} -> ${r.after} tok  (-${r.pct}%)`); }
+    else if (sub === "reset") { reset(); console.log("savings ledger cleared"); }
+    else { console.log(renderReport(report(), args.includes("--json"))); }
+    break;
+  }
   case "init": { const target = args.find((a) => !a.startsWith("--")); console.log(initProject(target, { lean: args.includes("--lean") })); break; }
   default:
     console.log(`ORDO — context-engineering framework for LLMs
@@ -24,6 +34,8 @@ switch (cmd) {
   ordo ponytail <text>       list the filler phrases the output contract forbids
   ordo profile               print the operating profile (paste into your LLM's system prompt)
   ordo skillstone            print the language skillstone (teach an LLM ORDO-G)
+  ordo measure               real billed tokens + $ from your Claude Code logs
+  ordo savings               cumulative tokens ORDO's inbound compaction saved (track / reset)
 
 The gates (REFEED / experimentalist / evaluation / autonomy / context-rot) are prompt SOPs in spec/*.md,
 loaded as text via getSpec(name) — they are methodology you give your LLM, not code that runs here.`);

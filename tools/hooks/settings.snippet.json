@@ -1,0 +1,13 @@
+{
+  "_comment": "Opt-in: merge this PostToolUse hook into ~/.claude/settings.json to auto-meter ORDO inbound savings. Runs node per tool call; logs tool output locally to ~/.ordo/savings.jsonl. Then run `ordo savings`.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "node \"C:\\\\Users\\\\Linus\\\\Documents\\\\GitHub\\\\ordo\\\\tools\\\\hooks\\\\post-tool-ordo.mjs\"" }
+        ]
+      }
+    ]
+  }
+}
