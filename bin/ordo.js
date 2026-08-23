@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { decode, emit, ponytailFlags, compressInbound, getOperatingProfile, getSkillstone } from "../src/index.js";
 import { measure, render } from "../tools/measure.mjs";
 import { track, report, renderReport, reset } from "../tools/savings.mjs";
-import { initProject } from "../src/init.js";
+import { initProject, installEnforcement } from "../src/init.js";
 
 const [cmd, ...args] = process.argv.slice(2);
 const arg = args.join(" ");
@@ -24,6 +24,7 @@ switch (cmd) {
     else { console.log(renderReport(report(), args.includes("--json"))); }
     break;
   }
+  case "enforce": { const t = args.find((a) => !a.startsWith("--")); console.log(installEnforcement(t, { install: args.includes("--install"), uninstall: args.includes("--uninstall"), shared: args.includes("--shared"), only: args.includes("--only") ? args[args.indexOf("--only") + 1] : null })); break; }
   case "init": { const target = args.find((a) => !a.startsWith("--")); console.log(initProject(target, { lean: args.includes("--lean") })); break; }
   default:
     console.log(`ORDO — context-engineering framework for LLMs

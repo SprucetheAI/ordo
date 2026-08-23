@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert";
 import { decode, emit, bestFormat, ponytailFlags, compressInbound, getOperatingProfile } from "../src/index.js";
 import { priceFor, costOf, parseTranscript, aggregate } from "../tools/measure.mjs";
-import { resolveModel, classifyTask } from "../src/index.js";
+import { resolveModel, classifyTask, cacheEconomics } from "../src/index.js";
 import { timeRuns } from "../tools/clock.mjs";
 import { initProject } from "../src/init.js";
 import { mkdtempSync, existsSync, readFileSync, rmSync } from "node:fs";
@@ -146,4 +146,63 @@ test("ordo init (full) writes the skill + .ordo persistence (grows with the proj
     assert.ok(existsSync(pjoin(d, ".ordo/mcp.json.example")));
     assert.ok(readFileSync(pjoin(d, ".ordo/ledger.md"), "utf8").includes("immutable anchor"));
   } finally { rmSync(d, { recursive: true, force: true }); }
+});
+
+// ---- prompt-cache economics (2026-08-24) ----
+// These exist because the token counter and the invoice disagree once a cache is in play, and the
+// old compressInbound only ever consulted the counter.
+test("cacheEconomics: the documented 50k->20k with 100k downstream is a LOSS", () => {
+  const v = cacheEconomics({ before: 50000, after: 20000, downstreamTokens: 100000 });
+  assert.strictEqual(v.keepCost, 15000);
+  assert.strictEqual(v.compressCost, 150000);
+  assert.strictEqual(v.worthIt, false);
+});
+test("cacheEconomics: a near-total win on a tail block with nothing after it DOES pay", () => {
+  const v = cacheEconomics({ before: 50000, after: 100, downstreamTokens: 0 });
+  assert.strictEqual(v.worthIt, true);
+});
+test("cacheEconomics: rates are parameters, not constants (no cache discount => always compress)", () => {
+  const v = cacheEconomics({ before: 50000, after: 20000, downstreamTokens: 100000, readRate: 1, writeRate: 1 });
+  assert.strictEqual(v.worthIt, true);
+});
+test("compressInbound: uncached behaviour is unchanged (backward compatible)", () => {
+  const doc = JSON.stringify({ rows: [{ a: 1, b: 2 }, { a: 3, b: 4 }] });
+  assert.notStrictEqual(compressInbound(doc), doc);            // still compresses
+  assert.strictEqual(compressInbound(doc), compressInbound(doc, {})); // opts default = old path
+});
+test("compressInbound: cached text with a big downstream is left alone", () => {
+  const doc = JSON.stringify({ rows: [{ a: 1, b: 2 }, { a: 3, b: 4 }, { a: 5, b: 6 }] });
+  assert.strictEqual(compressInbound(doc, { cached: true, downstreamTokens: 100000 }), doc);
+});
+test("compressInbound: cached still never INFLATES (measured-revert runs first)", () => {
+  const clean = "one line only";
+  assert.strictEqual(compressInbound(clean, { cached: true }), clean);
+});
+
+// ---- native effort deference (2026-08-24) ----
+test("classifyTask: recommends an effort, LIGHT low / STRICT high", () => {
+  assert.strictEqual(classifyTask({}).effort, "low");
+  assert.strictEqual(classifyTask({ loadBearing: true }).effort, "high");
+  assert.strictEqual(classifyTask({}).effortSource, "derived");
+});
+test("classifyTask: a host-pinned effort WINS over the derived one", () => {
+  const r = classifyTask({}, { nativeEffort: "xhigh" });
+  assert.strictEqual(r.effort, "xhigh");
+  assert.strictEqual(r.effortSource, "native");
+});
+test("classifyTask: never downgrades — a low pin is RAISED on a STRICT task", () => {
+  const r = classifyTask({ irreversible: true }, { nativeEffort: "low" });
+  assert.strictEqual(r.effort, "high");
+  assert.strictEqual(r.effortSource, "derived-raised");
+});
+test("classifyTask: an unknown effort string is ignored, not trusted", () => {
+  assert.strictEqual(classifyTask({}, { nativeEffort: "turbo" }).effortSource, "derived");
+});
+test("classifyTask: the structural contract is unchanged (mode/engage/gate)", () => {
+  const r = classifyTask({ realFork: true, multiStep: true });
+  assert.strictEqual(r.mode, "STRICT");
+  assert.strictEqual(r.gate, "EXPERIMENTALIST");
+  for (const k of ["diction", "verify-assert", "goal-lock", "ledger", "self-heal"]) assert.ok(r.engage.includes(k), k);
+  assert.strictEqual(classifyTask({}).mode, "LIGHT");
+  assert.strictEqual(classifyTask({}).gate, undefined);
 });

@@ -83,3 +83,97 @@ export function initProject(targetDir, opts = {}) {
     "  Auto-fires + auto-routes on coding/agentic tasks; /ordo activates on demand. Tool output is compaction-wrapped.\n" +
     "  Restart the session to pick it up.";
 }
+
+
+// Two hooks, one installer. The settings merge (append never replace, back up first, refuse
+// malformed JSON, leave other people's hooks alone) is the part that is easy to get wrong, so it is
+// written once. `srcImport` marks a hook that needs an absolute import back into this package: the
+// copy lands in someone else's .claude/ where "ordo-llm" does not resolve.
+const HOOKS = {
+  enforce:  { file: "ordo-enforce.mjs",  event: "Stop",             timeout: 15, srcImport: false,
+              blurb: "VACUOUS (a check that executed nothing reported as proof) and NARRATED (work announced, nothing done). Both err toward allowing; releases itself after 4 blocks." },
+  dispatch: { file: "ordo-dispatch.mjs", event: "UserPromptSubmit", timeout: 10, srcImport: true,
+              blurb: "Classifies each prompt and injects the ORDO discipline only on STRICT tasks. A LIGHT verdict injects nothing, so trivial turns pay nothing." },
+};
+
+function hookSource(spec) {
+  const src = readFileSync(join(ROOT, "hooks", spec.file), "utf8");
+  if (!spec.srcImport) return src;
+  // file:// URL, forward slashes: a Windows backslash path is not a valid ESM specifier.
+  const url = "file:///" + join(ROOT, "src", "index.js").replace(/\\/g, "/").replace(/^\//, "");
+  return src.replace("__ORDO_SRC__", url);
+}
+
+// ---- ordo enforce: the Stop hook that makes the gates fire (spec/enforcement.md) ----
+// PRINT-BY-DEFAULT. A hook is executable configuration: it runs a program on every stop, so it gets
+// read before it gets installed, the same way an inherited check does. --install is the consent.
+// Default target is settings.local.json: project-local, gitignored, and the installed command
+// carries absolute paths that are neither portable nor anyone else's business.
+export function installEnforcement(targetDir, opts = {}) {
+  const target = targetDir || process.cwd();
+  const hookDir = join(target, ".claude", "hooks");
+  const settingsPath = join(target, ".claude", opts.shared ? "settings.json" : "settings.local.json");
+  // default: both. --only enforce / --only dispatch narrows it.
+  const picked = (opts.only ? [opts.only] : Object.keys(HOOKS)).filter((k) => k in HOOKS);
+  if (!picked.length) return `Unknown hook. Pick one of: ${Object.keys(HOOKS).join(", ")}`;
+
+  if (opts.uninstall) {
+    if (!existsSync(settingsPath)) return `Nothing to uninstall: ${settingsPath} does not exist.`;
+    const cfg = JSON.parse(readFileSync(settingsPath, "utf8"));
+    if (!cfg?.hooks) return "Nothing to uninstall: no hooks configured.";
+    const marks = picked.map((k) => HOOKS[k].file.replace(".mjs", ""));
+    let removed = 0;
+    for (const ev of Object.keys(cfg.hooks)) {
+      if (!Array.isArray(cfg.hooks[ev])) continue;
+      cfg.hooks[ev] = cfg.hooks[ev]
+        .map((e) => ({ ...e, hooks: (e.hooks || []).filter((h) => {
+          const hit = marks.some((m) => String(h.command || "").includes(m));
+          if (hit) removed++;
+          return !hit;
+        }) }))
+        .filter((e) => (e.hooks || []).length > 0);   // drop entries we emptied, leave every other hook alone
+    }
+    writeFileSync(settingsPath, JSON.stringify(cfg, null, 2) + "\n");
+    return `Removed ${removed} ordo hook(s) from ${settingsPath}. Files left in ${hookDir}; delete them by hand if you want them gone.`;
+  }
+
+  const plan = picked.map((k) => {
+    const spec = HOOKS[k];
+    const path = join(hookDir, spec.file);
+    return { k, spec, path, src: hookSource(spec), entry: { hooks: [{ type: "command", command: `node "${path}"`, timeout: spec.timeout }] } };
+  });
+  if (!opts.install) {
+    const out = ["ordo enforce — DRY RUN. Nothing was written.", ""];
+    for (const { k, spec, path, src, entry } of plan) {
+      out.push(`  ${k}  ->  ${path}   (${src.split("\n").length} lines, read it before you install it)`);
+      out.push(`      hooks.${spec.event}: ${JSON.stringify(entry)}`);
+      out.push(`      ${spec.blurb}`, "");
+    }
+    out.push(`  settings -> ${settingsPath}`, "",
+      "  Read spec/enforcement.md, then re-run with --install. --only <name> narrows it.");
+    return out.join("\n");
+  }
+
+  mkdirSync(hookDir, { recursive: true });
+  for (const { path, src } of plan) writeFileSync(path, src);
+  let cfg = {};
+  if (existsSync(settingsPath)) {
+    try { cfg = JSON.parse(readFileSync(settingsPath, "utf8")); }
+    catch { return `Refusing to touch ${settingsPath}: it is not valid JSON. Fix it first — a malformed settings file silently disables EVERY setting in it.`; }
+    writeFileSync(settingsPath + ".ordo.bak", JSON.stringify(cfg, null, 2) + "\n");
+  }
+  cfg.hooks = cfg.hooks || {};
+  const lines = ["ordo enforce installed."];
+  for (const { k, spec, path, entry } of plan) {
+    cfg.hooks[spec.event] = cfg.hooks[spec.event] || [];
+    const dup = JSON.stringify(cfg.hooks[spec.event]).includes(spec.file.replace(".mjs", ""));
+    if (!dup) cfg.hooks[spec.event].push(entry);   // append: never replace someone else's hooks
+    lines.push(`  ${k}  ->  ${path}  [${spec.event}]${dup ? " (already registered, not duplicated)" : ""}`);
+  }
+  mkdirSync(dirname(settingsPath), { recursive: true });
+  writeFileSync(settingsPath, JSON.stringify(cfg, null, 2) + "\n");
+  lines.push(`  settings -> ${settingsPath}`,
+    "  Add .ordo/ and .claude/settings.local.json to your ignore rules. Restart the session to load it.",
+    "  Remove with: npx ordo enforce --uninstall");
+  return lines.join("\n");
+}

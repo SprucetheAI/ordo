@@ -141,14 +141,47 @@ const estTokens = (s) => Math.ceil(s.length / 4);
 /** Lossless built-in inbound compressor with a MEASURED-REVERT gate: JSON arrays -> TSV; else collapse
  *  dead whitespace; then re-measure and REVERT to the original if the transform did not strictly shrink
  *  it. Worst case = passthrough, never inflation — the lossless-first promise as a mechanism, not a slogan. */
-export function compressInbound(text) {
+export function compressInbound(text, opts = {}) {
+  const { cached = false, downstreamTokens = 0, readRate = CACHE.readRate, writeRate = CACHE.writeRate } = opts;
   const t = text.trim();
   let out = text;
   if (t[0] === "[" || t[0] === "{") {
     try { let data = JSON.parse(t); if (Array.isArray(data)) data = { _rows: data }; out = emit(data); } catch { /* fall through */ }
   }
   if (out === text) out = text.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ");
-  return estTokens(out) < estTokens(text) ? out : text; // measured-revert: never make it worse
+  if (estTokens(out) >= estTokens(text)) return text; // measured-revert: never make it worse
+  if (!cached) return out;
+  // SECOND GATE: this text already sits in a cached prefix, so shrinking it is not free.
+  const v = cacheEconomics({ before: estTokens(text), after: estTokens(out), downstreamTokens, readRate, writeRate });
+  return v.worthIt ? out : text;
+}
+
+// ---- prompt-cache economics (2026-08-24) ----
+// The layer above measures tokens as if every one is paid at full price. Once a prompt cache is in
+// play that is false, and the error runs the WRONG WAY: cache reads cost a fraction of base input,
+// so text already inside the cached prefix is nearly free, while rewriting it invalidates that
+// prefix AND everything after it, all of which must then be written again at full price.
+//
+// Compressing cached content is therefore usually a LOSS, and a large downstream makes it worse.
+// A 50k block cut to 20k with 100k after it: keeping costs (150k x 0.1) = 15k, compressing costs
+// (120k x 1.25) = 150k. The token counter reports a 30k saving. The bill shows 135k more spent.
+//
+// Rates are PARAMETERS, not constants of nature. They match the published multipliers at time of
+// writing; pass your own rather than trusting these once pricing moves.
+const CACHE = { readRate: 0.1, writeRate: 1.25 };
+
+/** Should a compression shrinking `before` to `after` tokens actually be applied, given the text is
+ *  inside a cached prefix with `downstreamTokens` after it? Returns both costs in base-input-token
+ *  equivalents plus the ratio the compression would have to beat. Exported so the rule is
+ *  inspectable rather than buried inside compressInbound. */
+export function cacheEconomics({ before, after, downstreamTokens = 0, readRate = CACHE.readRate, writeRate = CACHE.writeRate }) {
+  const keepCost = (before + downstreamTokens) * readRate;
+  const compressCost = (after + downstreamTokens) * writeRate;
+  const breakevenAfter = keepCost / writeRate - downstreamTokens;
+  return {
+    keepCost, compressCost, worthIt: compressCost < keepCost,
+    breakevenRatio: before > 0 ? Math.max(0, breakevenAfter / before) : 0,
+  };
 }
 
 // ---- opt-in model routing (claude-code-router's TABLE SHAPE, not its proxy) ----
@@ -178,16 +211,38 @@ export function resolveModel(req = {}, policy = null) {
  *  judgment whose accuracy is UNMEASURED (a conservative call, not a precision number). Routes EFFORT/STRUCTURE
  *  only — never a weaker model (resolveModel stays default-strong). LIGHT → only the two always-on 1× lossless
  *  instincts fire; STRICT arms the ledger + the instincts the fork actually needs + the routed gate. */
-export function classifyTask(signals = {}) {
+const EFFORT_RANK = { low: 0, medium: 1, high: 2, xhigh: 3 };
+
+export function classifyTask(signals = {}, env = {}) {
   const { irreversible = false, realFork = false, longHorizon = false, broad = false, loadBearing = false,
     multiStep = false, buildsFile = false, wideSolutionSpace = false } = signals;
-  const engage = ["diction", "verify-assert"]; // always-on, lossless, 1×
-  if (!(irreversible || realFork || longHorizon || broad || loadBearing)) return { mode: "LIGHT", engage };
-  if (multiStep) engage.push("goal-lock", "ledger");
-  if (buildsFile) engage.push("reuse-replan");
-  if (wideSolutionSpace) engage.push("divergence-width");
-  engage.push("self-heal");
-  return { mode: "STRICT", engage, gate: realFork ? "EXPERIMENTALIST" : "REFEED" };
+  const { nativeEffort = null } = env;
+  const engage = ["diction", "verify-assert"]; // always-on, lossless, 1x
+  const light = !(irreversible || realFork || longHorizon || broad || loadBearing);
+  if (!light) {
+    if (multiStep) engage.push("goal-lock", "ledger");
+    if (buildsFile) engage.push("reuse-replan");
+    if (wideSolutionSpace) engage.push("divergence-width");
+    engage.push("self-heal");
+  }
+  const out = light ? { mode: "LIGHT", engage }
+                    : { mode: "STRICT", engage, gate: realFork ? "EXPERIMENTALIST" : "REFEED" };
+  return { ...out, ...resolveEffort(light ? "low" : "high", nativeEffort) };
+}
+
+// ---- native effort deference (2026-08-24) ----
+// EFFORT and STRUCTURE are orthogonal, and ORDO only ever owned one of them. How hard the model
+// thinks is now a first-class host setting (effortLevel: low|medium|high|xhigh). Whether there is a
+// ledger, a goal-lock and a routed gate is not, and never will be. So classifyTask keeps owning the
+// structure and stops reimplementing the dial: it RECOMMENDS an effort, and a host that already
+// pinned one wins.
+//
+// Same default-strong law as resolveModel: routing may raise effort, never lower it. A session
+// pinned at xhigh must not be quietly dropped to low because one task looked easy.
+function resolveEffort(derived, nativeEffort) {
+  if (!nativeEffort || !(nativeEffort in EFFORT_RANK)) return { effort: derived, effortSource: "derived" };
+  const winner = EFFORT_RANK[nativeEffort] >= EFFORT_RANK[derived] ? nativeEffort : derived;
+  return { effort: winner, effortSource: winner === nativeEffort ? "native" : "derived-raised" };
 }
 
 // ---- the paste-in spec (METHODOLOGY: load as text, give to your LLM) ----

@@ -12,9 +12,13 @@ the pillars, and the orchestration discipline.
 1. **Honesty first.** Solve the real goal, not the prompt. Truth over the pleasing answer. 10 is not the
    target — a right-scoped 9 is optimal; over-engineering scores *down*. Never claim a number above its
    evidence tier.
-2. **Compress losslessly.** Commands in readable-ORDO grammar (`spec/grammar.md`); output by data shape
-   (tabular → TSV, nested → minified JSON, never pretty-print; prose → ponytail, cut the filler);
-   inbound docs via `compressInbound()` for the lossless cases.
+2. **Compress losslessly, and only where it pays.** Commands in readable-ORDO grammar
+   (`spec/grammar.md`); output by data shape (tabular → TSV, nested → minified JSON, never
+   pretty-print; prose → ponytail, cut the filler); inbound docs via `compressInbound()`.
+   **Never rewrite text already inside the cached prefix.** Cache reads cost a fraction of base
+   input, so shrinking cached content invalidates it and everything after it and is usually a net
+   LOSS. The token counter says you saved; the invoice says you spent. Pass `{cached:true,
+   downstreamTokens}` and let `cacheEconomics()` decide.
 3. **Classify, then gate.** Easy/deterministic → single pass. Hard, one answer → REFEED
    (`spec/framework.md`). Hard, real fork → experimentalist (`spec/experimentalist-gate.md`). Before
    "done" → evaluation gate (`spec/evaluation-gate.md`). Long autonomous run → autonomy gate
@@ -27,9 +31,10 @@ the pillars, and the orchestration discipline.
 import { decode, emit, compressInbound, ponytailFlags, resolveModel, classifyTask, getSpec } from "ordo-llm";
 decode("σ文3列简");        // ORDO command -> full English instruction
 emit(data);                // cheapest faithful format
-compressInbound(doc);      // lossless inbound compression (measured-revert: never inflates)
+compressInbound(doc, {cached, downstreamTokens}); // lossless; measured-revert AND cache-aware
+cacheEconomics({before, after, downstreamTokens}); // is shrinking cached text worth the reprice?
 ponytailFlags(text);       // filler the output contract forbids
-classifyTask(signals);     // {mode:LIGHT|STRICT, engage[]} — effort dispatcher (spec/thinking.md §1)
+classifyTask(signals, {nativeEffort}); // {mode, engage[], effort, effortSource} (spec/thinking.md §1)
 resolveModel(req, policy); // opt-in model routing (default-strong; null policy = never downgrade)
 getSpec("framework");      // load a gate's SOP as text
 ```
@@ -39,7 +44,11 @@ real-fork · horizon · breadth · load-bearing facts). LIGHT → act direct, on
 HARD → STRICT: lead with a plan + ledger, pin an immutable end-goal and re-derive each step from {goal + actual
 prior result}, reuse-before-build, single-pass divergence on wide forks, cause-first self-heal on a failed gate.
 One pass; the multi-pass gates fire by exception. Spend effort proportional to the stakes.
-The gates are SOPs you apply, not code that runs — `getSpec()` returns them as instructions.
+Most gates are SOPs you apply, not code that runs; `getSpec()` returns them as instructions. TWO now
+actually fire: `npx ordo enforce` installs hooks that block a turn reporting VACUOUS evidence (a check
+that executed nothing) or NARRATING work it did not do, and classifies each prompt so the discipline
+engages on STRICT tasks without being invoked. Print-by-default, self-releasing, opt-in
+(`spec/enforcement.md`).
 
 ## CLI (for non-coders too)
 - `npx ordo init` — install the `/ordo` skill into this project's `.claude/` (then Claude Code loads it
@@ -55,4 +64,8 @@ The gates are SOPs you apply, not code that runs — `getSpec()` returns them as
 
 ## Honest limits
 GPT-tokenizer proxies (re-validate on your model); no proven wall-clock win; the glyph form is opt-in
-(readable-ORDO is canonical and decodes more reliably). See `docs/SELF-EVAL.md`.
+(readable-ORDO is canonical and decodes more reliably). The cache rates in `cacheEconomics` are
+PARAMETERS matching published multipliers at time of writing, not constants of nature: pass your own
+once pricing moves. `classifyTask`'s RULE is deterministic, but the dispatch hook's reading of the
+five signals off a raw prompt is a conservative heuristic tuned to UNDER-fire, and its accuracy is
+unmeasured. See `docs/SELF-EVAL.md`.
