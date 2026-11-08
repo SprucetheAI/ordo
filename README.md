@@ -145,6 +145,12 @@ against your own usage instead of screenshots. Your prompt text stays in `~/.ord
 
 Every claim with its evidence tier: [`BENCHMARKS.md`](BENCHMARKS.md) · [`VERDICT.md`](VERDICT.md).
 
+## Who built it, and why
+
+ORDO came out of building [KLADDS](https://kladds.com), the workspace we run our content, CRM and comment-to-DM
+automations in. The 1,510 sessions and 527 compactions measured above are KLADDS being built, mostly in sessions
+long enough to compact several times. If you found ORDO through a comment and a DM, that funnel ran on KLADDS too.
+
 ## Credits
 
 Built on ideas from Headroom (inbound compaction), TOON (format by shape), LLMLingua (redundancy), Chroma's context-rot

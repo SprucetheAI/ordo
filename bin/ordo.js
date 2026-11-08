@@ -27,7 +27,7 @@ switch (cmd) {
   case "enforce": { const t = args.find((a) => !a.startsWith("--")); console.log(installEnforcement(t, { install: args.includes("--install"), uninstall: args.includes("--uninstall"), shared: args.includes("--shared"), only: args.includes("--only") ? args[args.indexOf("--only") + 1] : null })); break; }
   case "init": { const target = args.find((a) => !a.startsWith("--")); console.log(initProject(target, { lean: args.includes("--lean") })); break; }
   default:
-    console.log(`ORDO — context-engineering framework for LLMs
+    console.log(`ORDO — token discipline and long-session continuity for Claude Code
 
   ordo decode "σ文3列简"     decode an ORDO-G command to its full English instruction
   ordo inbound <text>        lossless inbound compression (JSON->TSV / whitespace)
