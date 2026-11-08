@@ -25,3 +25,13 @@ for (const [f, h] of Object.entries(FIGS)) {
     console.log(file);
   }
 }
+
+// Share images: a 16:9 cover (2x) for the splash and blog cards, and the 1200x630 og:image crawlers fetch.
+for (const [name, w, h, dpr] of [['cover', 1200, 675, 2], ['og', 1200, 630, 1]]) {
+  const file = join(out, `${name}.png`);
+  execFileSync(chrome, [
+    '--headless=new', '--hide-scrollbars', `--force-device-scale-factor=${dpr}`,
+    `--window-size=${w},${h}`, '--virtual-time-budget=8000', `--screenshot=${file}`, `${page}?f=hero&t=light&cover=${w}x${h}`,
+  ], { stdio: 'ignore' });
+  console.log(file);
+}

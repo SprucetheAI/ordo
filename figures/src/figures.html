@@ -31,6 +31,7 @@
   body { width: 1200px; font: 400 20px/1.45 var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
   .sheet { position: relative; overflow: hidden; background: var(--paper); border-radius: 32px; padding: 56px 64px; }
   .fig { display: none; } .fig.on { display: block; }
+  .cover body { margin: 0; } .cover .sheet { border-radius: 0; width: var(--cover-w); height: var(--cover-h) !important; box-sizing: border-box; }
   h1, h2 { font-family: var(--serif); font-weight: 440; letter-spacing: -0.02em; color: var(--ink); }
   em { font-style: italic; }
   .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
@@ -206,6 +207,8 @@
   const q = new URLSearchParams(location.search);
   document.getElementById(q.get('f') || 'hero').classList.add('on');
   if ((q.get('t') || 'light') === 'dark') document.documentElement.classList.add('dark');
+  // ?cover=WxH: full-bleed share/cover image (no corners, sheet fills the frame), e.g. 1200x675 cover, 1200x630 og.
+  const cv = q.get('cover'); if (cv) { const [w, h] = cv.split('x').map(Number); document.documentElement.style.setProperty('--cover-h', h + 'px'); document.documentElement.style.setProperty('--cover-w', w + 'px'); document.documentElement.classList.add('cover'); }
   // The kept squares sit where the data put them, scattered, not in a tidy first row. Seeded so a re-render matches.
   let s = 20261108; const rnd = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
   const order = [...Array(100).keys()].sort(() => rnd() - 0.5);
