@@ -15,7 +15,7 @@
 - tools/measure.mjs: real cost/token/duration meter from Claude Code's own JSONL usage.* (lossless billed counts).
 - tools/clock.mjs: wall-clock latency harness (the path to EARN "faster"; cut until clock-ab.json records a paired win).
 - tools/route_truth.py + trap_corpus.py + goal_lock_bench.py + judge.py + mcp_compact_ab.py: the foolproof A/B harnesses (charter §; docs/IMPROVEMENT-CHARTER.md).
-- `npm install ordo-llm` ; `npx ordo measure` ; `npx ordo init` (full) ; `npx ordo init --lean` ; `npm test` (26/26).
+- `npm install github:SprucetheAI/ordo` ; `npx github:SprucetheAI/ordo measure` ; `npx github:SprucetheAI/ordo init` (full) ; `npx github:SprucetheAI/ordo init --lean` ; `npm test`.
 - THREE install tiers (docs/V2-ARCHITECTURE.md): ordo.md (paste-in) · ORDO Lean (`init --lean`, compaction only) · ORDO Full (`init`, + dispatcher + gates + bundled MCPs + .ordo/ persistence).
 
 ## Methodology (prompt SOPs — text, not code)
@@ -25,6 +25,13 @@
   spec/autonomy.md, spec/context-rot.md, spec/orchestration.md.
 - spec/code-context.md (code-graph contract: AST-first, budgeted render, confidence-tagged edges).
 - spec/decompose.md (task-graph data contract: lower-id DAG + per-node testStrategy).
+
+## Continuity (v0.3, executable)
+- hooks/ordo-continuity.mjs: one hook dispatched on event (UserPromptSubmit, PostToolUse, PreCompact, SessionStart(compact), PostCompact, SubagentStart). Logs the user's prompts verbatim, nudges anchor updates per context band, restores anchor + requests + git state after compaction. Replaces ordo-dispatch.
+- docs/CONTINUITY.md: how the continuity layer works and what it guarantees.
+- docs/OPUS-NOV-3.md: what the Opus Nov-3 release changes for ORDO and what stays necessary.
+- tools/continuity_scan.py: scans real compactions and scores recall of the user's words (`python -I tools/continuity_scan.py --since 2026-10-01`).
+- tools/continuity_replay.mjs: replays those compactions through the hook and re-scores (`node tools/continuity_replay.mjs`).
 
 ## Evidence
 - BENCHMARKS.md (computed vs agent-judged, with reproduce commands).

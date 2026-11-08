@@ -1,9 +1,9 @@
 {
   "name": "ordo",
-  "version": "0.2.0",
-  "description": "ORDO — the auto-applied agent layer: compress tokens losslessly (measured −47–68%), bundle the tools Claude lacks (crawler/PDF/video, compaction-wrapped), and grow with the project. Honest-first; the gates are opt-in. Auto-activates on coding/agentic tasks.",
+  "version": "0.3.0",
+  "description": "Token discipline and long-session continuity for Claude Code. Cuts the tokens a session wastes, keeps your goal and your exact words alive across compaction (recall of your requests 47% to 70% on 527 real compactions), and keeps subagents briefed with small returns. Hooks plus a skill; every number has a script.",
   "author": { "name": "SprucetheAI" },
   "homepage": "https://github.com/SprucetheAI/ordo",
   "license": "MIT",
-  "keywords": ["context-engineering", "token-compression", "context-rot", "agents", "ordo"]
+  "keywords": ["context-engineering", "token-compression", "context-rot", "compaction", "long-context", "subagents", "ordo"]
 }

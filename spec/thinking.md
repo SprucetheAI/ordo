@@ -148,7 +148,7 @@ credit-assignment step. On a failed gate/test/assertion, write ONE typed reflect
 `docs/lessons`) — {pattern, cause, fix, gate-that-caught-it}, bounded + deduped — ONLY after a real gate caught a
 real failure; a run reads matching lessons at GATE-PRE. **Nothing self-modifies at runtime.** Claim the human-run
 accretion; the word "self" stays a FALLACY — NEVER claim autonomous self-growth (GTM claim 8 is NULL).
-**SELF-CLEAN** (loop-kill ~3 reps, revert-gate, rot-ledger, cost-meter) is already shipped — confirm, don't rebuild.
+**SELF-CLEAN** (loop-kill ~3 reps, revert-gate, rot-ledger, cost-meter) is not built: the loop-fingerprint guard has no code yet (see `spec/autonomy.md`). Do not claim it.
 
 ## 10 · The opt-out contract (why this is a discipline, not a ritual)
 Every §4-§9 instinct is skippable with a one-line reason ("LIGHT verdict, skip goal-lock"; "deterministic API,

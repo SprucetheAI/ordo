@@ -5,7 +5,7 @@
     {
       "name": "ordo",
       "source": "./",
-      "description": "The ORDO context-engineering framework as an installable skill — compress + 6 classify-first gates + 10 pillars + ledger orchestration, paste-free. Activates on coding/agentic tasks; silent on trivial replies."
+      "description": "ORDO for Claude Code: token discipline, continuity across compaction (anchor + your words re-injected), and subagent context management. Hooks wire themselves on install; silent on trivial turns."
     }
   ]
 }

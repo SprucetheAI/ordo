@@ -1,0 +1,11 @@
+{
+  "description": "ORDO continuity: logs your prompts verbatim, steers the compaction summary, re-injects your requests and the anchor after compaction, nudges at context bands, gives subagents a return contract.",
+  "hooks": {
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/ordo-continuity.mjs\"", "timeout": 10 }] }],
+    "PostToolUse": [{ "matcher": "Read|Bash|Grep|Glob|Agent|WebFetch|WebSearch|mcp__.*", "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/ordo-continuity.mjs\"", "timeout": 10 }] }],
+    "PreCompact": [{ "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/ordo-continuity.mjs\"", "timeout": 10 }] }],
+    "PostCompact": [{ "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/ordo-continuity.mjs\"", "timeout": 10 }] }],
+    "SessionStart": [{ "matcher": "compact", "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/ordo-continuity.mjs\"", "timeout": 10 }] }],
+    "SubagentStart": [{ "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/ordo-continuity.mjs\"", "timeout": 10 }] }]
+  }
+}

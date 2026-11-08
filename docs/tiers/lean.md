@@ -5,7 +5,7 @@ As neat and light as caveman.
 
 ## Install
 ```bash
-npx ordo init --lean
+npx github:SprucetheAI/ordo init --lean
 ```
 Drops a single stateless skill at `.claude/skills/ordo-lean/SKILL.md`. Auto-fires on tasks that produce or read
 structured data, JSON, logs, tables, or long output.

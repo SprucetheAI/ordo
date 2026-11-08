@@ -1,77 +1,78 @@
 ---
 name: ordo
 description: >-
-  ORDO context-engineering framework — compress tokens (terse input grammar + format-by-shape output
-  contract + lossless inbound), fight context rot (ledger + compact-at-threshold), and enforce quality
-  via classify-first gates (REFEED / experimentalist / evaluation / autonomy / context-rot). FIRE this at
-  the START of any coding, agentic, multi-step, research, refactor, audit, or long-context task, or when
-  the user asks to save tokens, reduce context, cut cost, improve answer quality, run with ORDO, or
-  references /ordo. Do NOT fire for a trivial one-line answer, a casual chat reply, or a single factual
-  lookup — the discipline is pure overhead there.
+  ORDO: token discipline plus long-session continuity for Claude Code. Keeps context small (read narrow,
+  tail tool output, format by shape), keeps the goal and the user's own words alive across compaction
+  (anchor file, verbatim intent log, compaction contract), keeps subagents briefed and their returns
+  small, and routes verification (headless tests for logic, a real browser for anything a human sees).
+  FIRE at the start of any coding, agentic, multi-step, research, refactor, audit or long-context task,
+  after a compaction, before fanning out subagents, or on "save tokens", "context", "it forgot",
+  "/ordo". Skip trivial one-line answers.
 ---
 
-# ORDO — operating spine
+# ORDO
 
-Run the whole tool: **compression + quality + autonomy**, honest-first. Depth is in `references/` (the full
-`OPERATING-PROFILE.md` + one file per gate). Load a reference only when that sub-task hits — keep context lean.
+Two jobs. Spend fewer tokens, and lose nothing that matters when the window is compacted. Measured on 1,510
+real sessions: almost all tokens are context re-read every turn (median turn ~470k), not output, and a
+compaction summary kept 47% of the words in the user's own requests. So the discipline is about the window.
 
-## 0. Honest stance (non-negotiable)
-- **Solve the real goal, not the prompt.** A perfect match to a weak brief is a failure. No sycophancy.
-- **10 is not the target.** A right-scoped 9 with no structural holes is optimal; the last tick is usually
-  gold-plating that *violates lean and scores DOWN*. Ship the optimal band; say when higher costs more than it returns.
-- **Measured or marked.** Every claim is a measured number or it says "unmeasured." Lossless-first: a compression
-  % counts only if its comprehension/quality gate passes. `ordo measure` reads real billed tokens/$ from the logs.
+## 0. Classify first (one pass)
+Trivial (a lookup, a one-line fix): answer, skip everything below. Long (multi-step, many files, a refactor,
+an audit, anything that may outlive the window): do §2 before the first edit.
 
-## 0.5 THINK FIRST — classify, then route (1× dispatcher · `references/thinking.md`)
-Spend effort proportional to stakes, in ONE pass; escalate to a multi-pass gate only by exception. Triage on 5
-hard signals (reversibility · real-fork · horizon · breadth · load-bearing facts). **LIGHT** → act direct, only
-diction + verify-assert fire. **HARD** → **STRICT**: plan + ledger, goal-lock (re-derive each step from {locked
-end-goal + ACTUAL prior result}), reuse-before-build, a divergence **flag** (escalate a weak modal answer to the
-experimentalist gate — the single-pass move was cut), cause-first self-heal. Routes effort, never a weaker model.
-Opt-out-able. Honest tier: the instinct lifts are DIRECTIONAL/wash on a frontier model — opt-in, not the headline.
+## 1. Context: the tokens that actually cost
+- Read narrow. Grep or Glob before Read; Read with offset/limit on files over ~300 lines; never re-read a
+  file you have not changed since the last read unless a compaction intervened.
+- Tail tool output: `cmd 2>&1 | tail -20`, test runners in quiet mode, `git log --oneline -n 10`.
+- Machine-facing output by shape: rows as TSV, nested data as minified JSON, never pretty-printed.
+- Prose a human reads: answer first, no preamble, no restating, no closer. Never compress code, quotes,
+  exact strings, numbers, or anything load-bearing.
+- Large reading (more than ~5 files, a crawl, a log): send a subagent and keep only its conclusion (§3).
 
-## 1. COMPRESS — emit only what serves, cheapest faithful form
-- **Input:** readable-ORDO grammar (`sum txt 3bul conc no:preamble`); the glyph form is an opt-in dense mode. `references/grammar.md`.
-- **Output:** format-by-shape — tabular → TSV, nested → minified JSON, **never pretty-print**; prose → ponytail
-  (cut preamble/restate/closer/meta, lossless); caveman register on *operational* text only, never explainers. `references/output.md`.
-- **Inbound:** compress what the model reads — lossless-first; **every transform is re-measured and reverted if it
-  doesn't reduce tokens** (worst case = passthrough). For a lossy cut, a coverage check must also pass. `references/output.md`.
-- **Tool output (the bundled-MCP value-add):** route EVERY tool result — a video transcript, a web/social crawl, a
-  PDF dump, any tool — through the inbound compactor before it enters context. Measured **−24 to −62%** on tool
-  output (`references/mcp-bundle.md`). The tools aren't ORDO's; compacting them is.
-- **See a video:** extract keyframes (`tools/video_frames.py`, ffmpeg) → Read them as images (native vision) →
-  ponytail the per-frame notes. PDFs/images native; web crawl = firecrawl; socials/recent = the **last30days** skill
-  (`/last30days <topic>`, free tier, multi-source) — compact its output.
-- **Orchestrate other skills:** when a house skill (ultra-design, ultra-video, …) is installed, route to it and
-  **compact its output** — ORDO is the routing + compaction layer *over* your skills, never a replacement.
-- **Code context:** prefer an AST graph (structure parsed free, never burns tokens) as a *navigation index* — open
-  the file for exact bytes; never trust an INFERRED edge as fact. `references/code-context.md`.
+## 2. Continuity: the anchor
+The hook prints the anchor path (`~/.ordo/sessions/<session>/anchor.md`; without the hook use `.ordo/anchor.md`).
+Write it before the first edit of a long task, update it at each phase, at each context nudge, and before you
+stop. It is re-injected after every compaction; the window is not.
 
-## 2. THE GATES — classify first, then route (each fires only where it earns its cost)
-| task | gate |
+```
+# ANCHOR · <task> · <date>
+GOAL: <the user's words, not your paraphrase>
+DONE-WHEN: <checkable condition>
+PLAN: 1 … 2 … 3 …
+DONE: <item> · <proof: sha, test line, file>
+NEXT: <the exact next step>
+DECISIONS: <decision> · <why>      (never re-litigate these)
+FAILED: <approach> · <why>         (never retry these)
+FILES: <paths in play>
+```
+
+After a compaction: the restore block (anchor + the user's requests verbatim + git state) outranks the
+summary. Re-read the anchor and the files you are about to edit before touching anything. A constraint the
+user stated ("never X", "always Y") stays binding until the user lifts it.
+
+## 3. Delegation: subagents
+- Fan out for breadth (more than 5 independent files or questions), not for a lookup you can do in two calls.
+- Brief like a peer who has seen nothing: goal, what done looks like, files to read, what is ruled out,
+  return shape and size. The hook adds a return contract (answer first, at most 300 words, TSV rows,
+  path:line, long output to a file) and the parent's GOAL line.
+- Writers get disjoint file sets, declared up front. Readers can share.
+- A subagent's report is a claim. Check the diff or the file before you call it done.
+
+## 4. Verify by surface (cheapest check that can fail)
+| Surface | Check |
 |---|---|
-| easy / one right answer | **single pass** — just do it; looping is tax |
-| hard, one right answer | **REFEED** — draft → typed critique → verify → refeed the DELTA → stop on the optimal band |
-| hard, real fork (arch/algorithm/novel) | **EXPERIMENTALIST** — conventional ∥ divergent → synthesize best-of-both |
-| any artifact, before "done" | **EVALUATION** — rate vs the real goal; debias; honest pros + caveats; optimal-band |
-| long-form autonomous run | **AUTONOMY** — gate-pre → propose-only → verify → escalate → terminate; kill wrongful loops; hard budgets |
-| long / many-file context | **CONTEXT-ROT** — complex work → ledger + compact-at-threshold (warn 70/flush 85/hard 90; drop tool-output first; keep load-bearing at the head+tail edges; rehydrate via the test gate) |
+| Logic, data, API, backend, tooling | Headless test or script; paste the last line of output |
+| Anything a human sees or clicks | Real browser: a11y snapshot first, screenshot only to judge pixels |
+| Motion, canvas, video | Headed browser, prove requestAnimationFrame fires before trusting a frame |
+| Nothing exists to check it | Say "untested" plainly |
+Code-level checks never sign off a user-facing feature; a browser pass never replaces a logic test.
 
-Plan a multi-step job with the **decompose contract** (`references/decompose.md`): a lower-id-only DAG, per-node `testStrategy`, complexity-gates-expansion.
+## 5. Gates (load the reference only when it fires)
+Hard task, one right answer: draft, critique, verify, refeed the delta (`references/evaluation-gate.md`).
+Real fork (architecture, naming, design): two to five distinct approaches, pick one, graft the best runner-up
+move (`references/experimentalist-gate.md`). Long autonomous run: propose-only side effects, hard budgets,
+stop on the same failure three times (`references/autonomy.md`). Context rot: `references/context-rot.md`.
 
-## 3. THE PILLARS — what it optimizes (test-gated; scoreboard in `tools/pillars.py`)
-P1 context · P2 token-output · P3 speed/cost (meter: `ordo measure`) · P4 quality · P5 hallucination · P6 tidyness ·
-P7 architecture · P8 rework · P9 long-form/loop · P10 context-integrity. Optimize all, lossless-first; a number no gate produced does not count.
-
-## 4. PERSISTENCE + MULTI-AGENT (`references/orchestration.md`)
-**Project memory (grows with the project):** on a STRICT task, read `.ordo/ledger.md` at the start (the immutable
-goal + decisions + open blockers) and append to it as you work — it is the durable state, the window is scratch.
-After a gate catches a real failure, append a one-line lesson to `.ordo/lessons.md` and read matching lessons at
-gate-pre. That is how ORDO grows with the project: a human-run, evidence-gated loop, not autonomous self-growth.
-Fan out for breadth (>5 independent files), confidence (adversarial verify), or scale. Coordinate through an append-only
-**ledger**: write-once ANCHOR, append-only PROGRESS (green count only rises), single-writer orchestrator, handoffs-as-pointers,
-all side effects through the approval queue (propose, never execute). Pipeline by default; barrier only when a stage needs all prior.
-
-## 5. ROUTING (opt-in, default-strong — `references/OPERATING-PROFILE.md`)
-If a `route:` policy is set, pick the model per task by a 5-signal cascade (longContext / think / webSearch / background-cheap /
-default). **Default everything to the strong model; never auto-downgrade** — routing is a user-declared cost preference, not a default.
+## 6. Honest stance
+Every number is measured or marked unmeasured. A compression counts only if meaning survives. "Untested" is
+a valid deliverable; a green check that cannot fail is not.

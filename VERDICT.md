@@ -8,7 +8,7 @@ it: costs are GPT-tokenizer proxies; the tests ran on one frontier model; re-val
 ## TL;DR
 **ORDO works, but not for the reason we started with.** The value is not exotic glyphs — it is the
 **grammar structure + an output-discipline contract**. Measured: a realistic request+response drops
-**~64% of tokens** end-to-end, and blind judges rated ORDO's output **better than plain English on 6 of
+**47 to 68 percent of tokens** end-to-end on one synthetic turn (`tools/ab_smoke.py`), and blind judges rated ORDO's output **better than plain English on 6 of
 9 tasks** (2 ties, 1 loss). It clears the user's ≥10% bar by a wide margin **and** delivers the
 "more-than-tokens" gain (quality), with honest nulls where the evidence didn't support a claim.
 
@@ -18,7 +18,7 @@ it: costs are GPT-tokenizer proxies; the tests ran on one frontier model; re-val
 | Input grammar (ORDO-G) | token save on 20 real prompts | **35% glyph / 32% readable** | — |
 | Grammar decodability | blind decode fidelity /2 | **1.70 (3-file) → 1.75 (skillstone)** | — |
 | **Surface form (deanchor)** | readable vs glyph: tokens + decode | **readable 2.00/2 @ −32%; glyph 1.95/2 @ −35%** | **C2 PASS** |
-| End-to-end (prompt+output) | combined token save, realistic mix | **64%** (explainer 51%, structured 72%) | **C3 PASS** |
+| End-to-end (prompt+output) | combined token save, realistic mix | **47 to 68%** on one synthetic turn (explainer 51%, structured 72%) | **C3 PASS** |
 | **Output quality** | blind A/B vs English, 9 tasks | **ORDO 6 win / 2 tie / 1 loss** (structure-driven) | **C4 PASS** |
 | Speed (proxy) | output-token delta | **−32%** (≈−48% ex one outlier) | **C6 PASS** |
 | Hallucination | confident-wrong + calibration | **no backfire; better-calibrated abstention; no reduction at saturated baseline** | **C5 PASS (null on reduction, +calibration)** |
@@ -36,7 +36,7 @@ it: costs are GPT-tokenizer proxies; the tests ran on one frontier model; re-val
    using *readable* ORDO — no foreign glyphs. The gain is a typed, unambiguous, one-parse command +
    an output contract, not glyph-foreignness. Cleaner and more defensible than the original hypothesis.
 3. **Output is the real prize.** Input grammar is a bounded ~32%; the output layer (format-by-shape +
-   ponytail) is where 64% end-to-end comes from, because output dominates the bill and most of it is
+   ponytail) is where the 47 to 68% end-to-end figure (one synthetic turn) comes from, because output dominates the bill and most of it is
    recoverable filler. The ORDO output contract is the single highest-value, lowest-risk piece.
 4. **Honest nulls.** No measured wall-clock speed win (only an output-token saving — fewer tokens ≠ 1:1
    latency). No measured hallucination reduction on a strong model (baseline already at floor) — but no

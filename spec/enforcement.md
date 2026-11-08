@@ -54,8 +54,8 @@ quietly vanished is indistinguishable, in the final report, from a gate that pas
 
 ## Install
 
-    npx ordo enforce            # print the hook, the target file, and the exact diff. Writes nothing.
-    npx ordo enforce --install  # write .claude/hooks/ordo-enforce.mjs + merge settings.local.json
+    npx github:SprucetheAI/ordo enforce            # print the hook, the target file, and the exact diff. Writes nothing.
+    npx github:SprucetheAI/ordo enforce --install  # write .claude/hooks/ordo-enforce.mjs + merge settings.local.json
 
 Print-by-default is not politeness. A hook is executable configuration: it runs a program on every
 stop, so it gets read before it gets installed, the same way an inherited check does. The default

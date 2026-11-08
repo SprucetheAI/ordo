@@ -15,9 +15,18 @@ target model.
 | inbound (lossless built-in) | JSON→TSV ~72%, prose-whitespace ~33% | `python tools/pillars.py` (P1 gate) |
 | ponytail filler-cut | ~67-77% on a chatty answer (lossless) | `python tools/pillars.py` (P2 gate) |
 | full-pipeline blend (modeled) | ~47% realistic turn, ~88% log-heavy, ~13% prose-heavy | `python tools/pipeline_recalc.py` |
-| runtime + classifier + installer + harness stats | **26/26 tests** | `npm test` ; `python harness/test_ordo.py` |
+| runtime + classifier + installer + harness stats | the test suite (`npm test`) | `npm test` ; `python harness/test_ordo.py` |
 | bundled-tool output compaction (Full tier) | crawl −62%, transcript −46%, PDF −24% (lossless) | `python tools/mcp_compact_ab.py` |
 | classifyTask misroute (deterministic) | 5-trigger taxonomy complete; extraction is the open number | `python tools/route_truth.py` |
+
+## Continuity (v0.3) — COMPUTED
+527 real compactions, scored on recall of the user's words. Baseline is the default summary; ORDO is the same compaction with `hooks/ordo-continuity.mjs`. Cost is about 2.3k tokens per compaction.
+| metric | baseline | ORDO | reproduce |
+|---|---|---|---|
+| keyword recall of the user's requests | 0.465 | **0.703** | `python -I tools/continuity_scan.py --since 2026-10-01` then `node tools/continuity_replay.mjs` |
+| verbatim recall | 0.080 | **0.542** | same |
+| constraint sentences kept | 0.374 | **0.584** | same |
+| added cost per compaction | 0 | ~2.3k tokens | same |
 
 ## AGENT-JUDGED (blind multi-agent, recorded in BUILD-LOG)
 | metric | result |

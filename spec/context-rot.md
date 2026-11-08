@@ -1,11 +1,3 @@
-# ORDO context-rot gate — complexity-adaptive compaction + ledger
-
-> Context degrades NON-UNIFORMLY as it grows, well before the window fills (a 200K model rots at ~50K;
-> middle context can score below no-context; effective length is ~50-65% of advertised). The fix is not
-> a bigger window, it is keeping the WORKING context small and the state in a LEDGER. Complexity-adaptive:
-> complex work gets the ledger + compact-at-threshold track; simple work runs the standard protocol.
-> Grounded in Chroma Context Rot (2025), Lost-in-the-Middle (2023), RULER (2024), NoLiMa (2025).
-
 # ORDO context-integrity gate — the complexity-adaptive anti-rot contract
 
 > The gate that keeps a long run accurate, not just terminating. Performance degrades as input
@@ -15,6 +7,22 @@
 > over its length*. It composes AFTER REFEED + experimentalist + autonomy, and it is **adaptive on
 > purpose**: compaction itself loses "subtle but critical context whose importance only becomes
 > apparent later," so it is pure tax on a short task and only earns its keep on a long one.
+
+## Enforced by code (v0.3)
+The prose rules below are no longer only advice. `hooks/ordo-continuity.mjs` enforces them, one hook dispatched on event (full account in `docs/CONTINUITY.md`):
+
+| Rule in this spec | Event | What the code does |
+|---|---|---|
+| Ledger written before the window drops it (§0, §2) | UserPromptSubmit | Logs every user prompt verbatim to `~/.ordo/sessions/<sid>/intent.jsonl` and points long tasks at `~/.ordo/sessions/<sid>/anchor.md` |
+| Warn early, checkpoint before compaction (§2) | PostToolUse, UserPromptSubmit | Reads real context size from the transcript and nudges "update the anchor" once per band: 150k, 300k, 450k, 600k, 750k tokens |
+| A summary must keep the load-bearing set (§3) | PreCompact | Prints instructions to the summarizer: keep requests with status, constraints verbatim, decisions, failures, identifiers |
+| Rehydrate, do not trust the summary (§4) | SessionStart (compact) | Re-injects the anchor, the user's requests verbatim (under 9.5k characters, constraint sentences first) and git state |
+| Audit the loss | PostCompact | Logs recall of the user's words into `~/.ordo/compactions.tsv` |
+| Sub-agent isolation (§2) | SubagentStart | Injects a return contract (answer first, 300 words or fewer, TSV rows, path:line, long output to a file) plus the parent's GOAL line |
+
+The old 70/85/90 % thresholds were fractions of an assumed 200K window. The code uses the absolute bands above instead, so the nudges fire at the same token counts whatever the window size. Where this spec says 70/85/90 %, read it as the 150k/300k/450k/600k/750k bands.
+
+Measured on 527 real compactions (`tools/continuity_scan.py`, `tools/continuity_replay.mjs`): keyword recall of the user's requests 0.465 to 0.703, verbatim recall 0.080 to 0.542, constraint sentences 0.374 to 0.584, at about 2.3k tokens per compaction. See BENCHMARKS.md.
 
 ## 0 · One law
 
@@ -175,41 +183,6 @@ COMPLEXITY CLASSIFIER ............ scored at intake, re-scored every tick → ST
 ```
 
 Composes after REFEED + experimentalist + autonomy. P10 measures the whole stack's rot-resistance.
-
-## Complexity classifier (which track)
-- Two-track gate scored at task intake AND re-checked every tick. Route to the LEDGER+compaction track if ANY trigger fires; else STANDARD track (no ledger, no compaction overhead).
-- Trigger 1 HORIZON: work projected >~15-20 tool calls OR spans multiple phases (tool outputs hit 70-80% of budget fast).
-- Trigger 2 BREADTH: touches >5 files OR >1 repo/lane (breadth = distractor density = Context-Rot's measured compounding driver; same as the fan-out gate).
-- Trigger 3 LOAD-BEARING FACTS: IDs, contracts, schema/migration state, decisions, lane IDs that must survive a long horizon (exactly what truncation silently drops).
-- Trigger 4 IRREVERSIBILITY: money / sends / migrations where a dropped fact causes a wrong action (cost of a bad summary is unbounded here).
-- Trigger 5 PROJECTED FILL: total tokens projected >~50% of window (conservative-by-design, NOT a measured optimum; rot is observable from the ~25-40% fill band).
-- STANDARD track = Q&A, single-file edit, lookup, short refactor: normal protocol, NO ledger file, NO compaction machinery — compaction loses subtle-but-critical context, so it is pure tax on short work.
-- One-way mid-run PROMOTION: a STANDARD task that unexpectedly trips the horizon/projected-fill trigger is promoted to LEDGER track at that tick (write anchor + green criteria to a fresh ledger first, then proceed).
-- Never put a single-fact lookup on the LEDGER track — the externalization + compaction overhead is all cost, no payoff.
-
-## Compaction policy (the trigger + how it runs)
-- LEDGER track only. Two independent triggers — EITHER fires compaction. Band is harness-tunable (public refs cite 70/85/90 and historically 83.5/95), the PRINCIPLE is fixed: compact BEFORE the model is starved, warn early so externalization happens first.
-- TRIGGER A — token band (high-water-mark, not a single cliff, against ~200K working budget): ~70% WARN -> pre-write ledger + offload pending heavy reads to a sub-agent; ~85% FLUSH+CHECKPOINT -> run the DROP pre-pass + force a ledger checkpoint; ~90% HARD-COMPACT -> summarize older history into a fresh window, carry the ledger pointer, then rehydrate. The 95%-style auto-trigger fires too late to even have room to summarize — that is why we warn at 70.
-- TRIGGER B — degradation signal (compact on rot RISK even UNDER the token threshold, because performance falls before the window fills): fire when context is large AND (distractor density: near-duplicate/competing tool outputs — 1 hurts, 4 compound) OR (self-contradiction / re-reading a file already read / re-deriving a known fact) OR (load-bearing content pushed into the under-attended middle).
-- HOW compaction runs (pass order): re-summarize older history INTO the ledger (the durable record) -> DROP per priority -> KEEP at the high-attention edges. Lossy is SAFE only because the ledger holds ground truth and the rehydrate gate (run the tests) is the non-lossy backstop.
-- PREVENTION before cure: before compacting, offload bounded research/exploration to sub-agents (existing fan-out, 5-8 files each). Each returns a ~1-2K-token distilled summary; the heavy trace never enters the main window. Keeps the orchestrator low-distractor and defers the trigger.
-- REHYDRATE after every compaction: read git log + ledger + acceptance checklist, re-read the ~5 recent files live, then RUN THE GATE. Never trust the summary as ground truth — the gate is the only non-lossy verification.
-- Write-discipline: update the ledger at every phase boundary AND at the 70%/85% warnings, NOT only at compaction time, so the durable record is never behind live state when a crash or compaction hits.
-
-## Keep / drop rules
-- KEEP rule = the minimal set whose loss flips the next action wrong. Everything kept is placed at the HIGH-ATTENTION EDGES (head and tail), never the under-attended middle (lost-in-the-middle ~20+pp swing from position alone).
-- KEEP 1: the immutable content-hashed ANCHOR (task + clarifications = definition-of-done), re-seated at the HEAD every tick so the objective can never rot into drift.
-- KEEP 2: the decidable GREEN CRITERIA (acceptance set + which are frozen-green) — progress is green criteria, not steps logged.
-- KEEP 3: load-bearing facts — key decisions+rationale, open bugs/blockers + how prior ones resolved, IDs/contracts/paths/lane IDs, files modified + current state.
-- KEEP 4: the recent working set at FULL fidelity — the ~5 most-recently-accessed files verbatim + the recent message window (~20K tokens). Summarize everything BEHIND this; keep the live edge sharp.
-- DROP 1 (FIRST, biggest+safest reclaim): tool-output pre-pass — file contents + command/search outputs are 70-80% of budget; evict/summarize them as a dedicated pass BEFORE touching any conversation prose. Reversible: the durable copy is on disk / behind a result_pointer.
-- DROP 2: resolved subtasks — once a phase/item passes its check, collapse its detailed trace to a one-line outcome (the ledger holds the durable record).
-- DROP 3: stale older turns beyond the recent-keep window.
-- DROP 4: superseded drafts + redundant/duplicate messages + intermediate reasoning already captured as a recorded decision.
-- Dropping is reversible by construction (re-read the file / the pointer / the ledger) and the rehydrate-gate catches anything the drop got wrong — which is what licenses lossy compaction.
-
-## P10 context-integrity (the pillar metric)
-P10 context-integrity (rot-resistance). METRIC: accuracy retention ratio = (accuracy on a long, rot-baited run WITH the gate) / (accuracy on the same task at short-context baseline), measured across length and compared against NAIVE CONTEXT-STUFFING as the control. GATE: a length-scaled multi-needle + distractor task run at both the short baseline and the long/full length, gate-on vs naive-stuff. The setup is deliberately the HARD one that actually breaks models — NoLiMa-style low query-needle similarity (forces associative reasoning, not string-match), >=1 distractor present (the measured compounding driver), answer planted mid-context (the U-curve trap) — because vanilla single-needle NIAH is near-saturated and OVERSTATES long-context ability (RULER/NoLiMa), so passing it is inadmissible evidence. PASS = retention stays >= floor (target >=85% of short-context base, the NoLiMa effective-length bar) at a length where the naive-stuffing control collapses. Reward abstention-under-uncertainty exactly as autonomy VERIFY rewards 'abstained' (Claude is the most conservative family: Opus 4 refused 2.89% vs GPT confidently-wrong). Baseline UNMEASURED — the harness is the build item; no number advances on opinion (pillars rule).
 
 ## Honest limits
 WHAT COMPACTION CANNOT RECOVER: anything that was load-bearing but NEVER written to the ledger before the compaction event that dropped it is gone — irreversibly. Compaction is lossy by definition; the ledger only preserves what the agent had the foresight to externalize. The known failure mode is real: 'compaction doesn't always pass perfectly clear instructions to the next agent,' and a fact's importance often 'only becomes apparent later' — after it has already scrolled off. The rehydrate gate (re-read git+ledger+files, run the tests) is the ONLY non-lossy backstop, and it only catches drift that the test suite can detect; an undocumented decision with no failing test passes silently wrong.

@@ -5,7 +5,7 @@ bundled tools, and persistence that grows with the project.
 
 ## Install
 ```bash
-npx ordo init        # or: /plugin marketplace add SprucetheAI/ordo → /plugin install
+npx github:SprucetheAI/ordo init        # or: /plugin marketplace add SprucetheAI/ordo → /plugin install
 ```
 Drops `.claude/skills/ordo/SKILL.md` + the operating profile + 16 gate-spec references + `.ordo/`
 (`ledger.md` + `lessons.md` + `mcp.json.example`).

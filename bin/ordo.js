@@ -37,7 +37,10 @@ switch (cmd) {
   ordo skillstone            print the language skillstone (teach an LLM ORDO-G)
   ordo measure               real billed tokens + $ from your Claude Code logs
   ordo savings               cumulative tokens ORDO's inbound compaction saved (track / reset)
+  ordo init [dir] [--lean]   install ORDO into <dir>/.claude/ (--lean: compaction-only skill)
+  ordo enforce [dir]         dry-run the hooks (Stop gate + continuity); --install / --uninstall,
+                             --shared (settings.json), --only <name>
 
 The gates (REFEED / experimentalist / evaluation / autonomy / context-rot) are prompt SOPs in spec/*.md,
-loaded as text via getSpec(name) — they are methodology you give your LLM, not code that runs here.`);
+loaded as text via getSpec(name). 'ordo enforce --install' wires hooks that run them as code.`);
 }

@@ -4,8 +4,8 @@ ORDO upgrades how you (an LLM) handle context, commands, output, and long runs. 
 operate by it.
 
 ## Activate
-Read `OPERATING-PROFILE.md` (or run `npx ordo profile`) and follow it as standing instructions. It is
-~1.4k tokens; cache it once. It contains: the honest stance, the compression layers, the gate routing,
+Read `OPERATING-PROFILE.md` (or run `npx github:SprucetheAI/ordo profile`) and follow it as standing instructions. It is
+~2.7k tokens; cache it once. It contains: the honest stance, the compression layers, the gate routing,
 the pillars, and the orchestration discipline.
 
 ## The contract, in brief
@@ -45,15 +45,15 @@ HARD → STRICT: lead with a plan + ledger, pin an immutable end-goal and re-der
 prior result}, reuse-before-build, single-pass divergence on wide forks, cause-first self-heal on a failed gate.
 One pass; the multi-pass gates fire by exception. Spend effort proportional to the stakes.
 Most gates are SOPs you apply, not code that runs; `getSpec()` returns them as instructions. TWO now
-actually fire: `npx ordo enforce` installs hooks that block a turn reporting VACUOUS evidence (a check
+actually fire: `npx github:SprucetheAI/ordo enforce` installs hooks that block a turn reporting VACUOUS evidence (a check
 that executed nothing) or NARRATING work it did not do, and classifies each prompt so the discipline
 engages on STRICT tasks without being invoked. Print-by-default, self-releasing, opt-in
 (`spec/enforcement.md`).
 
 ## CLI (for non-coders too)
-- `npx ordo init` — install the `/ordo` skill into this project's `.claude/` (then Claude Code loads it
+- `npx github:SprucetheAI/ordo init` — install the `/ordo` skill into this project's `.claude/` (then Claude Code loads it
   automatically on coding/agentic tasks). Or `/plugin marketplace add SprucetheAI/ordo` → `/plugin install`.
-- `npx ordo measure` — the **real** cost/token/duration meter: reads Anthropic's own `usage.*` from Claude
+- `npx github:SprucetheAI/ordo measure` — the **real** cost/token/duration meter: reads Anthropic's own `usage.*` from Claude
   Code's JSONL (lossless billed counts). Run it ORDO-on vs ORDO-off for the real A/B dollar delta.
 
 ## Two more layers
@@ -62,10 +62,13 @@ engages on STRICT tasks without being invoked. Print-by-default, self-releasing,
 - **Decompose** (`spec/decompose.md`): plan a multi-step job as a lower-id-only DAG with a per-node `testStrategy`;
   the autonomy gate iterates the pure next-task picker.
 
+## Continuity layer (v0.3)
+`hooks/ordo-continuity.mjs` is one hook dispatched on event; it replaces the old dispatch hook. It logs every user prompt verbatim to `~/.ordo/sessions/<sid>/intent.jsonl` and points long tasks at an anchor file, `~/.ordo/sessions/<sid>/anchor.md`. It reads real context size from the transcript and nudges "update the anchor" once per band (150k, 300k, 450k, 600k, 750k tokens). At PreCompact it tells the summarizer what to keep (requests with status, constraints verbatim, decisions, failures, identifiers). At SessionStart(compact) it re-injects the anchor, the user's requests verbatim (under 9.5k characters, constraint sentences first) and git state. PostCompact logs recall into `~/.ordo/compactions.tsv`, and SubagentStart injects a return contract plus the parent's GOAL line. Measured on 527 real compactions: keyword recall of the user's requests 0.465 to 0.703, verbatim 0.080 to 0.542, constraint sentences 0.374 to 0.584, at about 2.3k tokens per compaction. Details: `docs/CONTINUITY.md`.
+
 ## Honest limits
 GPT-tokenizer proxies (re-validate on your model); no proven wall-clock win; the glyph form is opt-in
 (readable-ORDO is canonical and decodes more reliably). The cache rates in `cacheEconomics` are
 PARAMETERS matching published multipliers at time of writing, not constants of nature: pass your own
-once pricing moves. `classifyTask`'s RULE is deterministic, but the dispatch hook's reading of the
+once pricing moves. `classifyTask`'s RULE is deterministic, but the continuity hook's reading of the
 five signals off a raw prompt is a conservative heuristic tuned to UNDER-fire, and its accuracy is
 unmeasured. See `docs/SELF-EVAL.md`.

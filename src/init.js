@@ -87,22 +87,15 @@ export function initProject(targetDir, opts = {}) {
 
 // Two hooks, one installer. The settings merge (append never replace, back up first, refuse
 // malformed JSON, leave other people's hooks alone) is the part that is easy to get wrong, so it is
-// written once. `srcImport` marks a hook that needs an absolute import back into this package: the
-// copy lands in someone else's .claude/ where "ordo-llm" does not resolve.
+// written once. A hook may listen on several events; each gets its own entry, optionally matched.
 const HOOKS = {
-  enforce:  { file: "ordo-enforce.mjs",  event: "Stop",             timeout: 15, srcImport: false,
-              blurb: "VACUOUS (a check that executed nothing reported as proof) and NARRATED (work announced, nothing done). Both err toward allowing; releases itself after 4 blocks." },
-  dispatch: { file: "ordo-dispatch.mjs", event: "UserPromptSubmit", timeout: 10, srcImport: true,
-              blurb: "Classifies each prompt and injects the ORDO discipline only on STRICT tasks. A LIGHT verdict injects nothing, so trivial turns pay nothing." },
+  enforce:    { file: "ordo-enforce.mjs", timeout: 15, events: [["Stop"]],
+                blurb: "VACUOUS (a check that executed nothing reported as proof) and NARRATED (work announced, nothing done). Both err toward allowing; releases itself after 4 blocks." },
+  continuity: { file: "ordo-continuity.mjs", timeout: 10,
+                events: [["UserPromptSubmit"], ["PostToolUse", "Read|Bash|Grep|Glob|Agent|WebFetch|WebSearch|mcp__.*"], ["PreCompact"], ["PostCompact"], ["SessionStart", "compact"], ["SubagentStart"]],
+                blurb: "Logs your prompts verbatim, steers the compaction summary, re-injects your requests + the anchor after compaction, nudges at context bands, gives subagents a return contract. Silent on trivial turns." },
 };
-
-function hookSource(spec) {
-  const src = readFileSync(join(ROOT, "hooks", spec.file), "utf8");
-  if (!spec.srcImport) return src;
-  // file:// URL, forward slashes: a Windows backslash path is not a valid ESM specifier.
-  const url = "file:///" + join(ROOT, "src", "index.js").replace(/\\/g, "/").replace(/^\//, "");
-  return src.replace("__ORDO_SRC__", url);
-}
+const hookSource = (spec) => readFileSync(join(ROOT, "hooks", spec.file), "utf8");
 
 // ---- ordo enforce: the Stop hook that makes the gates fire (spec/enforcement.md) ----
 // PRINT-BY-DEFAULT. A hook is executable configuration: it runs a program on every stop, so it gets
@@ -113,7 +106,7 @@ export function installEnforcement(targetDir, opts = {}) {
   const target = targetDir || process.cwd();
   const hookDir = join(target, ".claude", "hooks");
   const settingsPath = join(target, ".claude", opts.shared ? "settings.json" : "settings.local.json");
-  // default: both. --only enforce / --only dispatch narrows it.
+  // default: both. --only enforce / --only continuity narrows it.
   const picked = (opts.only ? [opts.only] : Object.keys(HOOKS)).filter((k) => k in HOOKS);
   if (!picked.length) return `Unknown hook. Pick one of: ${Object.keys(HOOKS).join(", ")}`;
 
@@ -140,13 +133,14 @@ export function installEnforcement(targetDir, opts = {}) {
   const plan = picked.map((k) => {
     const spec = HOOKS[k];
     const path = join(hookDir, spec.file);
-    return { k, spec, path, src: hookSource(spec), entry: { hooks: [{ type: "command", command: `node "${path}"`, timeout: spec.timeout }] } };
+    const entries = spec.events.map(([event, matcher]) => [event, { ...(matcher ? { matcher } : {}), hooks: [{ type: "command", command: `node "${path}"`, timeout: spec.timeout }] }]);
+    return { k, spec, path, src: hookSource(spec), entries };
   });
   if (!opts.install) {
     const out = ["ordo enforce — DRY RUN. Nothing was written.", ""];
-    for (const { k, spec, path, src, entry } of plan) {
+    for (const { k, spec, path, src, entries } of plan) {
       out.push(`  ${k}  ->  ${path}   (${src.split("\n").length} lines, read it before you install it)`);
-      out.push(`      hooks.${spec.event}: ${JSON.stringify(entry)}`);
+      for (const [event, entry] of entries) out.push(`      hooks.${event}: ${JSON.stringify(entry)}`);
       out.push(`      ${spec.blurb}`, "");
     }
     out.push(`  settings -> ${settingsPath}`, "",
@@ -164,16 +158,18 @@ export function installEnforcement(targetDir, opts = {}) {
   }
   cfg.hooks = cfg.hooks || {};
   const lines = ["ordo enforce installed."];
-  for (const { k, spec, path, entry } of plan) {
-    cfg.hooks[spec.event] = cfg.hooks[spec.event] || [];
-    const dup = JSON.stringify(cfg.hooks[spec.event]).includes(spec.file.replace(".mjs", ""));
-    if (!dup) cfg.hooks[spec.event].push(entry);   // append: never replace someone else's hooks
-    lines.push(`  ${k}  ->  ${path}  [${spec.event}]${dup ? " (already registered, not duplicated)" : ""}`);
+  for (const { k, spec, path, entries } of plan) {
+    for (const [event, entry] of entries) {
+      cfg.hooks[event] = cfg.hooks[event] || [];
+      const dup = JSON.stringify(cfg.hooks[event]).includes(spec.file.replace(".mjs", ""));
+      if (!dup) cfg.hooks[event].push(entry);   // append: never replace someone else's hooks
+      lines.push(`  ${k}  ->  ${path}  [${event}]${dup ? " (already registered, not duplicated)" : ""}`);
+    }
   }
   mkdirSync(dirname(settingsPath), { recursive: true });
   writeFileSync(settingsPath, JSON.stringify(cfg, null, 2) + "\n");
   lines.push(`  settings -> ${settingsPath}`,
     "  Add .ordo/ and .claude/settings.local.json to your ignore rules. Restart the session to load it.",
-    "  Remove with: npx ordo enforce --uninstall");
+    "  Remove with: npx github:SprucetheAI/ordo enforce --uninstall");
   return lines.join("\n");
 }

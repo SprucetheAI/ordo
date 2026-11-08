@@ -9,7 +9,7 @@ Paste [`OPERATING-PROFILE.md`](../../OPERATING-PROFILE.md) (the full spine, ~1.4
 
 > **"ordo.md" is the tier name; the file is `OPERATING-PROFILE.md`.** (A literal `ordo.md` can't ship in the repo —
 > it collides with `ORDO.md`, the language file, on case-insensitive Windows/Mac.) Want a literal file? Generate it:
-> `npx ordo profile > ordo.md`, then paste/point at that.
+> `npx github:SprucetheAI/ordo profile > ordo.md`, then paste/point at that.
 
 ## What you get
 - The full discipline **as prose**: the classify→route dispatcher, the compression contract (format-by-shape +

@@ -26,7 +26,7 @@ A breakdown tab per tier on the wiki; each is one decision the user makes by how
 | | **🟢 ordo.md** (system prompt) | **⚫ ORDO Lean** (install) | **🔶 ORDO Full** (install) |
 |---|---|---|---|
 | **What it is** | one paste-in file | the compaction core as a skill | the whole layer: core + gates + MCP tools + crawler + vision |
-| **Install** | paste `ordo.md` into `CLAUDE.md` / system prompt | `npx ordo init --lean` | `npx ordo init` or `/plugin install ordo` |
+| **Install** | paste `ordo.md` into `CLAUDE.md` / system prompt | `npx github:SprucetheAI/ordo init --lean` | `npx github:SprucetheAI/ordo init` or `/plugin install ordo` |
 | **Gives you** | the discipline as prose (compression + dispatcher) | **token saving only** — format-by-shape + ponytail + inbound, measured-revert | Lean **plus** the classify→route dispatcher, the gates (opt-in), a **crawler + native PDF + a video add-slot** with compaction, persistence + lessons |
 | **For** | "I just want it in my prompt" | "I just want fewer tokens / lower bills" | "I want the one install that fixes all the annoyances" |
 | **Footprint** | ~1k tokens, zero deps | tiny skill, zero MCP | a plugin + `.mcp.json` (the bundled servers) |
@@ -43,7 +43,7 @@ caveman. The full tier is the superset.
 Three layers, all already partly built; v2 hardens them:
 1. **The trigger** — the skill's `description` fires on coding/agentic/research/long-context work (negative
    triggers prevent misfire on trivial replies). One `CLAUDE.md` line or `/ordo` or the plugin loads it once; it's
-   then context-resident for the session. Drag-drop = `npx ordo init` drops `.claude/skills/ordo/`.
+   then context-resident for the session. Drag-drop = `npx github:SprucetheAI/ordo init` drops `.claude/skills/ordo/`.
 2. **The router** — `classifyTask()` (the dispatcher) decides *which part* applies per task: LIGHT → just compress
    + answer; STRICT → arm the ledger + the relevant gate. The user never picks; the framework routes. (Note: the
    router's real-world accuracy is being measured via `route_truth.py` — the taxonomy is complete; extraction is

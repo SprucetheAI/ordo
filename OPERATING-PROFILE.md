@@ -105,9 +105,12 @@ route:
   longContextThreshold: 60000
 ```
 
+## Continuity layer (v0.3)
+`hooks/ordo-continuity.mjs` is one hook dispatched on event; it replaces the old dispatch hook. It logs every user prompt verbatim to `~/.ordo/sessions/<sid>/intent.jsonl` and points long tasks at an anchor file, `~/.ordo/sessions/<sid>/anchor.md`. It reads real context size from the transcript and nudges "update the anchor" once per band (150k, 300k, 450k, 600k, 750k tokens). At PreCompact it tells the summarizer what to keep (requests with status, constraints verbatim, decisions, failures, identifiers). At SessionStart(compact) it re-injects the anchor, the user's requests verbatim (under 9.5k characters, constraint sentences first) and git state. PostCompact logs recall into `~/.ordo/compactions.tsv`, and SubagentStart injects a return contract plus the parent's GOAL line. Measured on 527 real compactions: keyword recall of the user's requests 0.465 to 0.703, verbatim 0.080 to 0.542, constraint sentences 0.374 to 0.584, at about 2.3k tokens per compaction. Details: `docs/CONTINUITY.md`.
+
 ## The honest scorecard (proven / null / unmeasured — do NOT over-claim)
-- **Proven compression:** grammar ~32% (input), output ~55-77% lossless, end-to-end ~47-64% on a real
-  mix; both tokenizers agree.
+- **Proven compression:** grammar ~32% (input), output ~55-77% lossless, end-to-end ~47 to 68% on one synthetic turn
+  (`tools/ab_smoke.py`); both tokenizers agree.
 - **Proven quality:** ORDO > English 6-2-1 blind (structure-driven); REFEED flaws 4→0; experimentalist
   3/4 on hard forks; do-it-good `tidy/fresh` −42% first-pass flaws.
 - **Honest NULLS (never claim these):** single-word substitution ~1% (dead); exotic/glyph surface
@@ -118,5 +121,5 @@ route:
 - **Issues fixed this pass:** a single operating entry-point (this doc); the evaluation SOP (the gate);
   multi-agent delegation codified (orchestration); readable-canonical coherence stated. **P3 meter BUILT**
   (`ordo measure` reads real billed usage.*; record an A/B to upgrade PROXY→COMPUTED); the loop-fingerprint
-  guard SHIPPED. **6 competitive gap-fillers added** (measure / `/ordo` packaging / measured-revert /
+  guard is NOT built (see `spec/autonomy.md`). **6 competitive gap-fillers added** (measure / `/ordo` packaging / measured-revert /
   code-context / decompose / routing) — `docs/ADD-PLAN.md`, `docs/COMPETITIVE-TEARDOWN.md`.
