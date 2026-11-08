@@ -1,0 +1,219 @@
+<!doctype html>
+<!--
+  ORDO README figures, in the KLADDS landing kit (paper, ink, one green, one coral; Newsreader, Shantell Sans,
+  JetBrains Mono, Inter). One page draws one figure: ?f=hero|loop|numbers|kladds&t=light|dark.
+  Render all eight PNGs with: node figures/src/render.mjs   (needs Chrome; fonts load from Google Fonts, OFL)
+  Every number drawn here is in README.md with the script that produced it.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Shantell+Sans:wght@400..700&family=JetBrains+Mono:wght@400..600&family=Inter:wght@400..700&display=block">
+<style>
+  :root {
+    --paper: #F4F1EA; --card: #FBFAF6; --ink: #16140F; --muted: rgb(22 20 15 / 0.6); --faint: rgb(22 20 15 / 0.38);
+    --hair: rgb(22 20 15 / 0.13); --cell: rgb(22 20 15 / 0.09);
+    --green: #148A52; --green-wash: #DCEFE2; --coral: #D9533B; --coral-wash: #F8E1DA; --sage: #DFE4D4;
+    --pill: #16140F; --pill-ink: #F4F1EA;
+    --serif: 'Newsreader', Georgia, serif; --hand: 'Shantell Sans', 'Segoe Print', cursive;
+    --sans: 'Inter', system-ui, sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --lift: 0 1px 0 rgb(22 20 15 / 0.04), 0 30px 60px -32px rgb(22 20 15 / 0.28), 0 0 0 1px var(--hair);
+  }
+  .dark {
+    --paper: #12110F; --card: #1C1B18; --ink: #F0EDE7; --muted: rgb(240 237 231 / 0.66); --faint: rgb(240 237 231 / 0.4);
+    --hair: rgb(240 237 231 / 0.14); --cell: rgb(240 237 231 / 0.1);
+    --green: #5FD39A; --green-wash: rgb(95 211 154 / 0.16); --coral: #FF8B72; --coral-wash: rgb(255 139 114 / 0.14);
+    --sage: #232A22; --pill: #F0EDE7; --pill-ink: #12110F;
+    --lift: 0 0 0 1px var(--hair);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { background: transparent; }
+  body { width: 1200px; font: 400 20px/1.45 var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  .sheet { position: relative; overflow: hidden; background: var(--paper); border-radius: 32px; padding: 56px 64px; }
+  .fig { display: none; } .fig.on { display: block; }
+  h1, h2 { font-family: var(--serif); font-weight: 440; letter-spacing: -0.02em; color: var(--ink); }
+  em { font-style: italic; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .hand { font-family: var(--hand); font-weight: 540; }
+
+  /* hero */
+  #hero .sheet { height: 600px; display: grid; grid-template-columns: 470px 1fr; gap: 40px; align-items: center; }
+  .brandline { display: flex; align-items: baseline; gap: 10px; color: var(--muted); font-size: 18px; margin-bottom: 28px; }
+  .brandline b { font: italic 500 34px/1 var(--serif); color: var(--ink); letter-spacing: -0.01em; }
+  #hero h1 { font-size: 74px; line-height: 0.98; }
+  #hero h1 .under { position: relative; white-space: nowrap; }
+  #hero h1 .under svg { position: absolute; left: -4px; right: -4px; bottom: -14px; width: calc(100% + 8px); height: 18px; }
+  .lede { margin-top: 30px; font-size: 20px; color: var(--muted); max-width: 450px; }
+  .cmd { margin-top: 30px; display: inline-flex; align-items: center; gap: 12px; background: var(--pill); color: var(--pill-ink);
+         border-radius: 999px; padding: 14px 24px; font: 500 17px/1 var(--mono); }
+  .cmd i { font-style: normal; opacity: 0.55; }
+  .receipt { position: relative; background: var(--card); border-radius: 18px; box-shadow: var(--lift); padding: 30px 32px 28px; }
+  .receipt .cap { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--hair); font: 500 14px/1.35 var(--mono); color: var(--muted); }
+  .grids { display: grid; grid-template-columns: auto auto; justify-content: space-between; gap: 28px; }
+  .grid { display: grid; grid-template-columns: repeat(10, 18px); gap: 5px; }
+  .grid span { width: 18px; height: 18px; border-radius: 5px; background: var(--cell); }
+  .grid.a span.k { background: var(--ink); }
+  .grid.b span.k { background: var(--green); }
+  .glabel { margin-top: 16px; display: flex; align-items: baseline; gap: 10px; }
+  .glabel .n { font: 600 40px/1 var(--mono); letter-spacing: -0.03em; }
+  .glabel .t { font-size: 15px; color: var(--muted); line-height: 1.25; }
+  .grid-b-n { color: var(--green); }
+  .note { position: absolute; color: var(--coral); font-size: 22px; line-height: 1.1; transform: rotate(-4deg); }
+
+  /* loop */
+  #loop .sheet { height: 470px; }
+  #loop h2, #numbers h2, #kladds h2 { font-size: 44px; line-height: 1.04; }
+  .steps { margin-top: 40px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 34px; position: relative; }
+  .step { position: relative; background: var(--card); border-radius: 16px; box-shadow: var(--lift); padding: 20px 18px 20px; min-height: 196px; }
+  .step .k { font: 500 14px/1 var(--mono); color: var(--faint); }
+  .step h3 { margin-top: 12px; font: 600 21px/1.15 var(--sans); letter-spacing: -0.01em; }
+  .step p { margin-top: 10px; font-size: 15.5px; line-height: 1.38; color: var(--muted); }
+  .step p code { font: 500 14px var(--mono); color: var(--ink); }
+  .step.cut { background: var(--coral-wash); box-shadow: none; outline: 1.5px dashed var(--coral); outline-offset: -1.5px; }
+  .step.cut h3, .step.cut .k { color: var(--coral); }
+  .step.back { background: var(--green-wash); box-shadow: none; }
+  .step.back h3, .step.back .k { color: var(--green); }
+  .arrow { position: absolute; top: 50%; right: -30px; width: 26px; height: 14px; color: var(--faint); }
+  .retnote { position: absolute; right: 64px; bottom: 34px; color: var(--green); font-size: 21px; transform: rotate(-2deg); }
+
+  /* numbers */
+  #numbers .sheet { height: 500px; }
+  .sub { margin-top: 10px; font-size: 18px; color: var(--muted); }
+  .rows { margin-top: 38px; display: grid; gap: 30px; }
+  .row { display: grid; grid-template-columns: 300px 1fr 92px; gap: 28px; align-items: center; }
+  .row .lab { font: 600 19px/1.25 var(--sans); }
+  .row .lab small { display: block; font-weight: 400; font-size: 15px; color: var(--muted); margin-top: 3px; }
+  .bars { display: grid; gap: 8px; }
+  .bar { position: relative; height: 26px; border-radius: 7px; background: var(--cell); }
+  .bar b { position: absolute; inset: 0 auto 0 0; border-radius: 7px; }
+  .bar.before b { background: var(--faint); }
+  .bar.after b { background: var(--green); }
+  .bar span { position: absolute; top: 50%; transform: translateY(-50%); font: 600 15px/1 var(--mono); padding-left: 10px; }
+  .bar.after span { color: var(--green); }
+  .bar.before span { color: var(--muted); }
+  .delta { color: var(--green); font-size: 26px; text-align: right; }
+  .legend { position: absolute; left: 64px; right: 64px; bottom: 34px; display: flex; gap: 28px; font: 500 14px/1 var(--mono); color: var(--muted); }
+  .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 8px; }
+
+  /* kladds */
+  #kladds .sheet { height: 470px; display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
+  .blob { position: absolute; width: 520px; height: 520px; border-radius: 50%; background: var(--sage); right: -120px; bottom: -260px; }
+  .lock { display: flex; align-items: center; gap: 12px; color: var(--ink); }
+  .lock svg { width: 40px; height: 40px; }
+  .lock span { font: 580 26px/1 var(--serif); letter-spacing: 0.045em; font-variation-settings: 'opsz' 24; }
+  #kladds h2 { margin-top: 30px; font-size: 52px; }
+  #kladds .body { margin-top: 18px; font-size: 19px; color: var(--muted); max-width: 660px; }
+  .cta { margin-top: 30px; display: flex; align-items: center; gap: 22px; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; background: var(--pill); color: var(--pill-ink); border-radius: 999px;
+          padding: 16px 28px; font: 600 18px/1 var(--sans); }
+  .cta .hand { color: var(--muted); font-size: 19px; transform: rotate(-3deg); display: inline-block; }
+  .side { position: relative; z-index: 1; align-self: center; display: grid; gap: 12px; }
+  .chip { background: var(--card); box-shadow: var(--lift); border-radius: 14px; padding: 14px 16px; font-size: 15.5px; line-height: 1.3; }
+  .chip b { display: block; font: 500 13px/1 var(--mono); color: var(--faint); margin-bottom: 6px; }
+  .chip.ok { border-left: 3px solid var(--green); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="fig" id="hero"><div class="sheet">
+  <div>
+    <div class="brandline"><b>ordo</b><span>for Claude Code</span></div>
+    <h1>Claude Code forgets <em><span class="under">what you said.<svg viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path d="M3 11 C 60 4, 120 15, 180 8 S 270 6, 297 10" fill="none" stroke="var(--coral)" stroke-width="3.2" stroke-linecap="round"/></svg></span></em></h1>
+    <p class="lede">ORDO keeps your goal and your exact words alive across compaction, re-reads fewer tokens, and briefs subagents small. Every number has a script.</p>
+    <div class="cmd"><i>$</i>npx github:SprucetheAI/ordo</div>
+  </div>
+  <div class="receipt">
+    <div class="grids">
+      <div><div class="grid a" id="ga"></div>
+        <div class="glabel"><span class="n">8</span><span class="t">kept word for word<br>by the summary alone</span></div></div>
+      <div><div class="grid b" id="gb"></div>
+        <div class="glabel"><span class="n grid-b-n">54</span><span class="t">kept word for word<br>with ORDO</span></div></div>
+    </div>
+    <div class="cap">100 of your messages, after Claude Code compacts the chat</div>
+    <div class="note hand" style="left: 150px; top: -46px;">eight. that's it.</div>
+    <svg style="position:absolute; left: 116px; top: -22px; width: 60px; height: 60px; color: var(--coral)" viewBox="0 0 60 60" aria-hidden="true">
+      <path d="M38 6 C 20 10, 10 22, 12 44" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M5 36 L12 46 L20 37" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</div></section>
+
+<!-- LOOP -->
+<section class="fig" id="loop"><div class="sheet">
+  <h2>How it keeps your words <em>through a compaction</em></h2>
+  <div class="steps">
+    <div class="step"><div class="k">01</div><h3>You type</h3><p>Every request saved verbatim to <code>intent.jsonl</code>. Zero tokens.</p>
+      <svg class="arrow" viewBox="0 0 26 14"><path d="M1 7 H23 M17 1 L24 7 L17 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="step"><div class="k">02</div><h3>The anchor</h3><p>On a long task the model writes <code>anchor.md</code>: goal in your words, plan, decisions, what failed.</p>
+      <svg class="arrow" viewBox="0 0 26 14"><path d="M1 7 H23 M17 1 L24 7 L17 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="step"><div class="k">03</div><h3>Context fills</h3><p>One nudge per band, 150k to 750k, to bring the anchor up to date.</p>
+      <svg class="arrow" viewBox="0 0 26 14"><path d="M1 7 H23 M17 1 L24 7 L17 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="step cut"><div class="k">04</div><h3>Compaction</h3><p>The window is thrown away. The summary alone keeps under half your words.</p>
+      <svg class="arrow" viewBox="0 0 26 14"><path d="M1 7 H23 M17 1 L24 7 L17 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="step back"><div class="k">05</div><h3>Handed back</h3><p>The anchor and your requests, rules first, back in context. About 2,300 tokens.</p></div>
+  </div>
+  <div class="retnote hand">and it carries on from your words, not a paraphrase</div>
+</div></section>
+
+<!-- NUMBERS -->
+<section class="fig" id="numbers"><div class="sheet">
+  <h2>Same 527 compactions, <em>run again.</em></h2>
+  <p class="sub">Real Claude Code sessions, Oct 1 to Nov 8, 2026. What survived each compaction, with and without the restore.</p>
+  <div class="rows">
+    <div class="row"><div class="lab">Your requests, word for word<small>whole messages kept verbatim</small></div>
+      <div class="bars"><div class="bar before"><b style="width:8%"></b><span style="left:8%">8.0%</span></div>
+        <div class="bar after"><b style="width:54.2%"></b><span style="left:54.2%">54.2%</span></div></div>
+      <div class="delta hand">+46</div></div>
+    <div class="row"><div class="lab">Your rules<small>sentences with never, always, must</small></div>
+      <div class="bars"><div class="bar before"><b style="width:37.4%"></b><span style="left:37.4%">37.4%</span></div>
+        <div class="bar after"><b style="width:58.4%"></b><span style="left:58.4%">58.4%</span></div></div>
+      <div class="delta hand">+21</div></div>
+    <div class="row"><div class="lab">Your distinctive words<small>keyword recall of your requests</small></div>
+      <div class="bars"><div class="bar before"><b style="width:46.5%"></b><span style="left:46.5%">46.5%</span></div>
+        <div class="bar after"><b style="width:70.3%"></b><span style="left:70.3%">70.3%</span></div></div>
+      <div class="delta hand">+24</div></div>
+  </div>
+  <div class="legend"><span><i style="background:var(--faint)"></i>summary alone</span><span><i style="background:var(--green)"></i>summary + ORDO</span><span style="margin-left:auto">node tools/continuity_replay.mjs</span></div>
+</div></section>
+
+<!-- KLADDS -->
+<section class="fig" id="kladds"><div class="sheet">
+  <div class="blob"></div>
+  <div style="position:relative; z-index:1">
+    <div class="lock">
+      <svg viewBox="0 0 1240 1240" aria-hidden="true"><g fill="currentColor" stroke="currentColor">
+        <path stroke="none" d="M200 118 H492 V184 H266 V352 L200 376 Z"/><path stroke="none" d="M200 872 L266 894 V1062 H492 V1128 H200 Z"/>
+        <line stroke-width="4" x1="318" y1="230" x2="318" y2="1022"/><line stroke-width="4" x1="484" y1="410" x2="484" y2="846"/>
+        <line stroke-width="4" x1="318" y1="230" x2="484" y2="410"/><line stroke-width="4" x1="484" y1="410" x2="318" y2="630"/>
+        <line stroke-width="4" x1="318" y1="630" x2="484" y2="846"/><line stroke-width="4" x1="484" y1="846" x2="318" y2="1022"/>
+        <circle stroke="none" cx="318" cy="230" r="24"/><circle stroke="none" cx="484" cy="410" r="24"/><circle stroke="none" cx="318" cy="630" r="24"/>
+        <circle stroke="none" cx="484" cy="846" r="24"/><circle stroke="none" cx="318" cy="1022" r="24"/>
+        <line stroke-width="94" x1="512" y1="620" x2="806" y2="332"/><line stroke-width="94" x1="856" y1="284" x2="1058" y2="86"/>
+        <line stroke-width="94" x1="512" y1="652" x2="786" y2="908"/><line stroke-width="94" x1="836" y1="954" x2="1052" y2="1156"/>
+      </g></svg><span>KLADDS</span></div>
+    <h2>Built inside KLADDS. <em>The last business app you'll ever need.</em></h2>
+    <p class="body">The 1,510 sessions behind every number here are KLADDS being built. Customers, mail, calls, content and the comment-to-DM funnel that probably sent you here, in one place, with an AI that does the busywork.</p>
+    <div class="cta"><span class="pill">Get KLADDS free <span aria-hidden="true">→</span></span><span class="hand">free forever plan, no card</span></div>
+  </div>
+  <div class="side">
+    <div class="chip ok"><b>you asked</b>Find 20 roofers in Malmö and email them</div>
+    <div class="chip"><b>kladds</b>20 added to your CRM. 18 emails drafted. Send on your yes?</div>
+  </div>
+</div></section>
+
+<script>
+  const q = new URLSearchParams(location.search);
+  document.getElementById(q.get('f') || 'hero').classList.add('on');
+  if ((q.get('t') || 'light') === 'dark') document.documentElement.classList.add('dark');
+  // The kept squares sit where the data put them, scattered, not in a tidy first row. Seeded so a re-render matches.
+  let s = 20261108; const rnd = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
+  const order = [...Array(100).keys()].sort(() => rnd() - 0.5);
+  const keepA = new Set(order.slice(0, 8)), keepB = new Set(order.slice(0, 54));
+  for (const [id, keep] of [['ga', keepA], ['gb', keepB]]) {
+    const g = document.getElementById(id);
+    if (g) for (let i = 0; i < 100; i++) { const c = document.createElement('span'); if (keep.has(i)) c.className = 'k'; g.append(c); }
+  }
+</script>
+</body>
+</html>
