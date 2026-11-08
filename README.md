@@ -20,6 +20,9 @@
   <a href="#what-ordo-does-not-claim">Limits</a> ·
   <a href="#built-inside-kladds">Who built it</a>
 </p>
+
+<p align="center"><b><a href="https://app.kladds.com/d/waddt1eZWjWCng?utm_source=github&utm_medium=readme&utm_campaign=ordo">Read the full story: why Claude Code forgets what you told it, and the fix →</a></b></p>
+
 <!-- REEL: when the ORDO reel is live, add one line here: "Watch the 60-second version" linking to it. -->
 
 ---
@@ -169,6 +172,7 @@ Every claim with its evidence tier: [`BENCHMARKS.md`](BENCHMARKS.md) · [`VERDIC
 ORDO came out of building [KLADDS](https://app.kladds.com/?utm_source=github&utm_medium=readme&utm_campaign=ordo), the workspace we run our customers, mail, calls, content and comment-to-DM
 automations in. The 1,510 sessions and 527 compactions measured above are KLADDS being built, mostly in sessions long
 enough to compact several times. If you found ORDO through a comment and a DM, that funnel ran on KLADDS too.
+The [full write-up of how ORDO came to be](https://app.kladds.com/d/waddt1eZWjWCng?utm_source=github&utm_medium=readme&utm_campaign=ordo) is a KLADDS splash page, built in the same workspace.
 
 **[Get KLADDS free →](https://app.kladds.com/?utm_source=github&utm_medium=readme&utm_campaign=ordo)** Free forever plan, no card.
 
