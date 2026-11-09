@@ -71,7 +71,7 @@ Hooks, not a different model. One file, `hooks/ordo-continuity.mjs`:
 1. Every prompt you type is saved verbatim to disk (no tokens spent).
 2. On a long task the model is told to write an anchor file: goal in your words, plan, done with proof, next
    step, decisions, failed approaches.
-3. As context crosses 150k / 300k / 450k / 600k / 750k it is nudged once to update the anchor.
+3. As context crosses 40% / 65% / 85% of the compaction window it is nudged once to update the anchor.
 4. Before compaction, the summarizer gets a contract: every request with done/open status, your constraints in
    your words, decisions, failures, exact paths and ids.
 5. After compaction, the anchor and your own requests (constraints first) are put back, under the harness cap.

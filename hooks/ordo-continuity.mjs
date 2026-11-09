@@ -9,7 +9,7 @@
 //
 // One file, dispatched on hook_event_name. Never blocks, never throws, always exits 0.
 //   UserPromptSubmit  log the prompt verbatim; on a long task point at the anchor; context bands
-//   PostToolUse       context bands only (reads the transcript tail)
+//   PostToolUse       context bands (reads the transcript tail); one line when a single result is huge
 //   PreCompact        stdout = instructions to the summarizer (keep requests+status, decisions, failures)
 //   SessionStart      source=compact: re-inject anchor + the user's requests verbatim + git state
 //   PostCompact       audit what the summary kept -> $ORDO_HOME/compactions.tsv (costs no tokens)
@@ -27,7 +27,17 @@ import { fileURLToPath } from "node:url";
 const CAP = 9500;
 const FRESH_MS = 20 * 60e3;   // an anchor touched this recently needs no nudge
 const home = () => process.env.ORDO_HOME || join(homedir(), ".ordo");
-const bands = () => (process.env.ORDO_BANDS || "150,300,450,600,750").split(",").map((k) => +k * 1000).filter((n) => n > 0);
+// Bands follow the window Claude Code compacts at, so the last one always lands just before the cliff
+// (the harness fires at about window - 33k). ORDO_BANDS (in k) overrides; with no window set, absolute bands.
+export const windowTokens = () => { const m = /^(\d+)(k?)$/i.exec(String(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW || "").trim()); const w = m ? +m[1] * (m[2] ? 1000 : 1) : 0; return w >= 100000 ? w : 0; };
+export const bands = () => {
+  if (process.env.ORDO_BANDS) return process.env.ORDO_BANDS.split(",").map((k) => +k * 1000).filter((n) => n > 0);
+  const w = windowTokens();
+  return w ? [0.4, 0.65, 0.85].map((f) => Math.round(w * f)) : [150, 300, 450, 600, 750].map((k) => k * 1000);
+};
+const ANCHOR_SHOWN = 3500;    // chars of the anchor that come back after a compaction
+const ANCHOR_FAT = 6000;      // past this the anchor has become a log; say so
+const bigResult = () => +(process.env.ORDO_BIG_RESULT || 60000);   // chars in one tool result, ~15k tokens
 
 export const MACHINE = ["<task-notification", "<scheduled-task", "<cross-session", "<agent-message", "Another Claude session sent",
   "Stop hook feedback", "Base directory for this skill", "This session is being continued", "<system-reminder",
@@ -35,6 +45,12 @@ export const MACHINE = ["<task-notification", "<scheduled-task", "<cross-session
 export const isMachine = (s) => { const t = String(s).trimStart(); return MACHINE.some((m) => t.startsWith(m)); };
 
 export const clip = (s, n) => (s.length <= n ? s : s.slice(0, n - 40).trimEnd() + ` [+${s.length - n + 40} chars clipped]`);
+// Head and tail. An anchor grows in the middle (DONE); GOAL sits at the top, NEXT / DECISIONS / FAILED at the bottom.
+export const clipMid = (s, n) => {
+  if (s.length <= n) return s;
+  const mark = `\n[… ${s.length - n + 90} chars of the middle not shown; the file has them …]\n`, head = Math.floor((n - mark.length) * 0.4);
+  return s.slice(0, head).trimEnd() + mark + s.slice(s.length - (n - mark.length - head)).trimStart();
+};
 const one = (s, n) => clip(String(s).replace(/\s+/g, " ").trim(), n);
 const readText = (f) => { try { return readFileSync(f, "utf8"); } catch { return ""; } };
 const readJSON = (f, d) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
@@ -91,15 +107,33 @@ export function lastContext(transcript) {
 
 function bandNudge(p, ctx) {
   if (!ctx) return "";
-  const st = readJSON(p.state, {}), crossed = new Set(st.bands || []);
-  const hit = bands().filter((b) => ctx >= b && !crossed.has(b));
+  const st = readJSON(p.state, {}), crossed = new Set(st.bands || []), all = bands();
+  const hit = all.filter((b) => ctx >= b && !crossed.has(b));
   if (!hit.length) return "";
   hit.forEach((b) => crossed.add(b));
   writeState(p, { ...st, bands: [...crossed], ctx });
-  const age = anchorAge(p);
-  if (age !== null && age < FRESH_MS) return "";
-  return `[ordo] context ${Math.round(ctx / 1000)}k tokens. ${age === null ? "Create" : "Update"} the anchor now: ${p.anchor} `
-    + "(GOAL in the user's words, DONE with proof, NEXT, DECISIONS, FAILED). It is re-injected after compaction; this window is not.";
+  const age = anchorAge(p), w = windowTokens(), k = Math.round(ctx / 1000);
+  const size = age === null ? 0 : readText(p.anchor).length;
+  const fat = size > ANCHOR_FAT
+    ? ` The anchor is ${size} chars and about ${ANCHOR_SHOWN} come back: cut it to state (one line per DONE item; history lives in commits and the ledger).` : "";
+  // The last band is the cliff warning. It fires even when the anchor is fresh, because it is about what to do next.
+  if (w && hit.includes(all[all.length - 1]))
+    return `[ordo] context ${k}k tokens; compaction fires near ${Math.round((w - 33000) / 1000)}k. Land the unit you are in, `
+      + `${age === null ? "write" : "update"} the anchor (${p.anchor}), and start no new large read here: send it to a subagent.` + fat;
+  if (age !== null && age < FRESH_MS) return fat ? "[ordo]" + fat : "";
+  return `[ordo] context ${k}k tokens. ${age === null ? "Create" : "Update"} the anchor now: ${p.anchor} `
+    + "(GOAL in the user's words, DONE with proof, NEXT, DECISIONS, FAILED). It is re-injected after compaction; this window is not." + fat;
+}
+
+// One result this size is re-read on every later turn until the window is compacted. Say it at most twice per window.
+function bigNudge(p, inp) {
+  let size = 0; try { const r = inp.tool_response; size = typeof r === "string" ? r.length : JSON.stringify(r ?? "").length; } catch {}
+  if (size < bigResult()) return "";
+  const st = readJSON(p.state, {});
+  if ((st.big || 0) >= 2) return "";
+  writeState(p, { ...st, big: (st.big || 0) + 1 });
+  return `[ordo] that ${inp.tool_name || "tool"} result was ~${Math.round(size / 4000)}k tokens and is re-read every turn until compaction. `
+    + "Next time: Grep first, Read with offset/limit, tail the output, or send the reading to a subagent and keep its conclusion.";
 }
 
 // Sentences that carry a rule. Words, not a model: cheap, deterministic, and it under-reads rather than invents.
@@ -122,7 +156,7 @@ export function restore(p, cwd) {
   const age = anchorAge(p);
   const anchor = age === null
     ? `No anchor yet. If this is a multi-step task, write one now at ${p.anchor} (GOAL in the user's words, PLAN, DONE, NEXT, DECISIONS, FAILED).`
-    : `ANCHOR · ${p.anchor} · updated ${ago(age)} ago\n${clip(readText(p.anchor).trim(), 3500)}`;
+    : `ANCHOR · ${p.anchor} · updated ${ago(age)} ago\n${clipMid(readText(p.anchor).trim(), ANCHOR_SHOWN)}`;
   const git = gitState(cwd);
   const all = readIntent(p);
   let budget = CAP - head.length - anchor.length - git.length - 200;
@@ -168,7 +202,7 @@ export function compactInstructions(p) {
     "Drop: tool output bodies and file contents (they can be re-read), narration, dead-end detail beyond a one-line verdict.",
     `The user's messages are saved verbatim (${n} so far, ${p.intent}) and are re-injected after this summary, as is the anchor. Do not copy them out; record what they do not say: status, decisions, failures.`,
   ];
-  if (anchor) out.push("", "CURRENT ANCHOR (already persisted, do not restate):", clip(anchor, 4000));
+  if (anchor) out.push("", "CURRENT ANCHOR (already persisted, do not restate):", clipMid(anchor, 4000));
   return clip(out.join("\n"), CAP);
 }
 
@@ -176,8 +210,12 @@ export function subagentContract(p) {
   const goal = (readText(p.anchor).match(/^GOAL[^\n]*(?:\n(?![A-Z]{3,}\b)[^\n]+)*/m) || [""])[0];
   return ["[ordo] Subagent return contract: lead with the answer; at most 300 words unless the brief sets a size; rows as TSV;",
     "cite path:line; write anything longer to a file and return its path; name what you could not verify.",
+    "Read narrow (Grep before Read, offset/limit). You have a brief, not the conversation: if something load-bearing is missing, say so instead of guessing.",
     goal ? `Parent ${one(goal, 400)}` : ""].filter(Boolean).join(" ");
 }
+
+const SUB_COMPACT = "ORDO: a subagent's window is being compacted. Keep the brief you were given word for word, every finding so far with its "
+  + "path:line or command, what is ruled out, and the exact next step. Drop tool output bodies and file contents; they can be re-read.";
 
 function audit(p, inp) {
   const st = readJSON(p.state, {}), prompts = readIntent(p).map((x) => x.text);
@@ -209,18 +247,20 @@ export function handle(inp) {
       return ctxOut(out.join("\n"));
     }
     case "PostToolUse":
-      return sub ? "" : ctxOut(bandNudge(p, lastContext(inp.transcript_path)));
+      return sub ? "" : ctxOut([bandNudge(p, lastContext(inp.transcript_path)), bigNudge(p, inp)].filter(Boolean).join("\n"));
     case "PreCompact": {
+      if (sub) return SUB_COMPACT;   // the user's contract belongs to the main thread; so does the audit row
       const st = readJSON(p.state, {});
       writeState(p, { ...st, preCompact: { ts: Date.now(), trigger: inp.trigger, ctx: lastContext(inp.transcript_path) } });
       return compactInstructions(p);
     }
     case "PostCompact":
-      audit(p, inp); return "";
+      if (!sub) audit(p, inp);
+      return "";
     case "SessionStart": {
       if (inp.source !== "compact" || sub) return "";
       const st = readJSON(p.state, {});
-      writeState(p, { ...st, bands: [], epoch: (st.epoch || 0) + 1 });
+      writeState(p, { ...st, bands: [], big: 0, epoch: (st.epoch || 0) + 1 });
       return ctxOut(restore(p, inp.cwd));
     }
     case "SubagentStart":

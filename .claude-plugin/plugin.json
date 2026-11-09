@@ -1,6 +1,6 @@
 {
   "name": "ordo",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Token discipline and long-session continuity for Claude Code. Cuts the tokens a session wastes, keeps your goal and your exact words alive across compaction (recall of your requests 47% to 70% on 527 real compactions), and keeps subagents briefed with small returns. Hooks plus a skill; every number has a script.",
   "author": { "name": "SprucetheAI" },
   "homepage": "https://github.com/SprucetheAI/ordo",

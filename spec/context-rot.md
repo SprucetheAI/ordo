@@ -14,13 +14,13 @@ The prose rules below are no longer only advice. `hooks/ordo-continuity.mjs` enf
 | Rule in this spec | Event | What the code does |
 |---|---|---|
 | Ledger written before the window drops it (§0, §2) | UserPromptSubmit | Logs every user prompt verbatim to `~/.ordo/sessions/<sid>/intent.jsonl` and points long tasks at `~/.ordo/sessions/<sid>/anchor.md` |
-| Warn early, checkpoint before compaction (§2) | PostToolUse, UserPromptSubmit | Reads real context size from the transcript and nudges "update the anchor" once per band: 150k, 300k, 450k, 600k, 750k tokens |
+| Warn early, checkpoint before compaction (§2) | PostToolUse, UserPromptSubmit | Reads real context size from the transcript and nudges "update the anchor" once per band: 40%, 65% and 85% of `CLAUDE_CODE_AUTO_COMPACT_WINDOW` (absolute 150k to 750k bands when no window is set). The last band is a cliff warning, and a single tool result of ~15k tokens or more gets one line |
 | A summary must keep the load-bearing set (§3) | PreCompact | Prints instructions to the summarizer: keep requests with status, constraints verbatim, decisions, failures, identifiers |
 | Rehydrate, do not trust the summary (§4) | SessionStart (compact) | Re-injects the anchor, the user's requests verbatim (under 9.5k characters, constraint sentences first) and git state |
 | Audit the loss | PostCompact | Logs recall of the user's words into `~/.ordo/compactions.tsv` |
 | Sub-agent isolation (§2) | SubagentStart | Injects a return contract (answer first, 300 words or fewer, TSV rows, path:line, long output to a file) plus the parent's GOAL line |
 
-The old 70/85/90 % thresholds were fractions of an assumed 200K window. The code uses the absolute bands above instead, so the nudges fire at the same token counts whatever the window size. Where this spec says 70/85/90 %, read it as the 150k/300k/450k/600k/750k bands.
+The old 70/85/90 % thresholds were fractions of an assumed 200K window. Since v0.4 the bands are fractions of the window Claude Code actually compacts at, so the last nudge always lands just before the cliff. Where this spec says 70/85/90 %, read it as those bands. A long anchor is restored head and tail, so NEXT, DECISIONS and FAILED survive a DONE list that grew.
 
 Measured on 527 real compactions (`tools/continuity_scan.py`, `tools/continuity_replay.mjs`): keyword recall of the user's requests 0.465 to 0.703, verbatim recall 0.080 to 0.542, constraint sentences 0.374 to 0.584, at about 2.3k tokens per compaction. See BENCHMARKS.md.
 

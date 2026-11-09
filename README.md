@@ -9,12 +9,14 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-16140F.svg" alt="MIT"></a>
 </p>
 
-<p align="center"><b>Token discipline and long-session continuity for Claude Code.</b> Spend fewer tokens, keep your goal and your exact words alive across compaction, and keep subagents briefed with small returns. Every number has a script.</p>
+<p align="center"><b>Context discipline, continuity and first-pass orchestration for Claude Code.</b> Spend fewer tokens, keep your goal and your exact words alive across compaction, stop the model working from a guess, and land long work in one pass instead of three. Every number has a script.</p>
 
 <p align="center">
   <a href="#install">Install</a> ·
   <a href="#the-problem-measured">The problem</a> ·
   <a href="#what-it-does">What it does</a> ·
+  <a href="#how-a-session-runs">How a session runs</a> ·
+  <a href="#fewer-invented-facts">Fewer invented facts</a> ·
   <a href="#the-numbers">Numbers</a> ·
   <a href="#measure-it-on-your-own-logs">Measure yours</a> ·
   <a href="#what-ordo-does-not-claim">Limits</a> ·
@@ -48,6 +50,13 @@ Recommended with the hooks, if you run a 1M-context model: compact at 400k inste
 { "env": { "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "400000" } }
 ```
 
+Why 400k and not lower: a session is not empty when it starts. Ours measured 124k before the first tool call
+(system prompt, tool lists, CLAUDE.md, skill list), and Claude Code compacts about 33k under the window, so 400k
+leaves roughly 240k of working room, about one phase of real work. Go much lower and the session spends its time
+compacting; go much higher and every turn re-reads stale tool output. The cap is a backstop, not the strategy:
+what keeps paying is a smaller base, less inflow, and compactions that land on a phase boundary. ORDO's nudges
+follow whatever window you set (40%, 65%, 85% of it).
+
 Node 18+. Nothing leaves your machine: state lives in `~/.ordo/` (override with `ORDO_HOME`).
 
 ## The problem, measured
@@ -80,25 +89,72 @@ numbers are the same before and after the November 3 thinking change people are 
 | Event | What ORDO does | Token cost |
 |---|---|---|
 | UserPromptSubmit | Saves your prompt verbatim to `~/.ordo/sessions/<id>/intent.jsonl`. On a long task, points the model at an anchor file to write first | 0, or ~60 once |
-| PostToolUse | Reads the real context size from the transcript; at 150k / 300k / 450k / 600k / 750k, one nudge to update the anchor (silent if the anchor is fresh) | ~50 per band |
-| PreCompact | Gives the summarizer a contract: every request with done/open status, your constraints in your words, decisions, failed approaches, exact ids | summarizer input only |
-| SessionStart (compact) | Puts back the anchor, your requests verbatim (constraints first), and git state, under the 10k-char hook cap | ~2,300 per compaction |
+| PostToolUse | Reads the real context size from the transcript; at 40% / 65% / 85% of your compaction window, one nudge to update the anchor (silent if it is fresh). The last one is a cliff warning: land the unit, update the anchor, start no new large read | ~50 per band |
+| PostToolUse | One line when a single tool result is ~15k tokens or more, because it is re-read on every later turn. At most twice per window | ~45, rarely |
+| PreCompact | Gives the summarizer a contract: every request with done/open status, your constraints in your words, decisions, failed approaches, exact ids. A subagent's own compaction gets a smaller contract: its brief, its findings, its next step | summarizer input only |
+| SessionStart (compact) | Puts back the anchor (head and tail when it is long, so NEXT, DECISIONS and FAILED survive), your requests verbatim (constraints first), and git state, under the 10k-char hook cap | ~2,300 per compaction |
 | PostCompact | Audits how much of your words the summary kept into `~/.ordo/compactions.tsv` | 0 |
-| SubagentStart | Return contract (answer first, at most 300 words, TSV rows, path:line, long output to a file) plus your goal line | ~80 per subagent |
+| SubagentStart | Return contract (answer first, at most 300 words, TSV rows, path:line, long output to a file, say what is missing instead of guessing) plus your goal line | ~100 per subagent |
 
-The anchor is a plain file the model maintains: GOAL in your words, PLAN, DONE with proof, NEXT, DECISIONS (never
-re-litigated), FAILED (never retried). The window can be thrown away; the anchor cannot.
+The anchor is a plain file the model maintains: GOAL in your words, DONE-WHEN, PLAN, DONE with proof, NEXT,
+DECISIONS (never re-litigated), FAILED (never retried). It is state, not a log: under ~3,500 characters, because
+that is what comes back. The window can be thrown away; the anchor cannot.
 
 **2. Context discipline** (the skill, [`skills/ordo/SKILL.md`](skills/ordo/SKILL.md)): read narrow, tail tool
 output, machine output by shape (TSV, minified JSON, never pretty-printed), prose without preamble, fan out large
-reading to subagents and keep only the conclusion.
+reading to subagents and keep only the conclusion. Bulk data goes file to file through a script, never through
+the window.
 
-**3. Verification by surface**: headless tests for logic, data and backends (paste the last line); a real browser for
-anything a human sees, accessibility snapshot first and screenshots only to judge pixels; a headed browser with a
-requestAnimationFrame check for motion. A code test never signs off a user-facing feature.
+**3. Verification on the cheapest surface that can fail.**
+
+| What you are proving | Where | Evidence |
+|---|---|---|
+| Logic, data, parsing, API, tooling | Headless: a test or a one-off script | Last line of output |
+| Page structure, text, console, network | Browser, accessibility snapshot; headless is fine | The values |
+| Look: hierarchy, spacing, does it read | A real render, judged by eyes | The screenshot and a verdict |
+| Motion, canvas, video playback | Headed window, requestAnimationFrame proven first | Frame timings |
+| A video or audio file | Probe first, then watch only the cuts in question | Probe lines |
+
+A test never signs off something a human sees; a screenshot never proves logic.
 
 **4. The gates and the language** (opt-in): classify first, then refeed, diverge, evaluate or bound an autonomous
 run only where it earns its cost ([`spec/`](spec/)). The compact command language is in [`ORDO.md`](ORDO.md).
+
+ORDO removes waste, never thought. It does not shorten reasoning on a hard problem, trim a deliverable you asked
+for, or narrow a creative search. It governs what surrounds the work: what gets read, what gets kept, what gets
+checked.
+
+## How a session runs
+
+One pass to size the task, then the smallest process that fits it.
+
+| Task | What ORDO does |
+|---|---|
+| Trivial: a lookup, a one-line answer | Nothing. The discipline would be pure overhead |
+| Nimble: one defect, one file | Read narrow, fix, run the one check, report. No anchor |
+| Long: many steps, many files, may outlive the window | Anchor before the first edit; updated at each phase and each nudge |
+| Massive: a plan with phases, more than one window | The plan becomes a file with a status table. One phase per fresh context (a briefed subagent, or the main thread right after a compaction). The orchestrator holds the table and the verdicts, not the reading |
+
+Everything has one home, so nothing sits in the window "in case": state in the anchor, the plan in its file,
+history in commits, rules in docs that are grepped by heading, facts in memory. A phase ends when its check ran,
+its status line flipped with the proof, and the anchor was updated. A status flips only with proof, and a skipped
+step is written down as skipped, which is what stops the quiet lazy step in hour three.
+
+## Fewer invented facts
+
+In a long session the model rarely invents out of nowhere. It fills a gap, and the gaps have causes ORDO can close:
+
+| Where the guess comes from | What closes it |
+|---|---|
+| It is working from a summary's paraphrase of what you asked | Your requests come back verbatim after every compaction, rule sentences first |
+| It remembers a file that has since changed | After a compaction, re-read the anchor and the files you are about to edit before touching anything |
+| It retries something that already failed, or reopens a settled choice | FAILED and DECISIONS live in the anchor and survive the window |
+| A subagent filled a hole in its brief with an assumption | Briefs name goal, done-when, files and what is ruled out; the return contract says to name what is missing instead of guessing; the report is treated as a claim and the diff is checked |
+| "Done" was said on a check that could not fail | Every "done" carries the last line of a real check; where none exists the answer is "untested" |
+| A claim about code nobody read | A claim cites a line read or a command run in this window, or it is labelled unverified |
+
+These are mechanisms, not a measured hallucination rate. What is measured is the first row: how much of what you
+said is still in front of the model after a compaction.
 
 ## The numbers
 
@@ -152,6 +208,7 @@ against your own usage instead of screenshots. Your prompt text stays in `~/.ord
 
 - **It does not change the model.** It changes what the model is given: your words and its own anchor, after every compaction.
 - **Recall is a proxy.** Keyword and verbatim recall measure what is still in the window, not whether the answer is right. A live headless A/B shows the hooks firing in a real session; at small scale both arms pass ([`docs/CONTINUITY.md`](docs/CONTINUITY.md)).
+- **No hallucination rate.** The rules in [Fewer invented facts](#fewer-invented-facts) are mechanisms. We have not measured how often a model invents with and without them.
 - **The anchor depends on the model writing it.** The hooks prompt it and put it back; they cannot write it for the model.
 - **The restore is capped.** Claude Code caps hook output at 10,000 characters, so on sessions with hundreds of prompts the middle ones come back as one-line openings or rule sentences. The full log is on disk.
 - **Not faster.** Each hook call costs ~150 ms of Node startup on Windows; there is no measured wall-clock win.
@@ -174,6 +231,9 @@ automations in. The 1,510 sessions and 527 compactions measured above are KLADDS
 enough to compact several times. If you found ORDO through a comment and a DM, that funnel ran on KLADDS too.
 The [full write-up of how ORDO came to be](https://app.kladds.com/d/waddt1eZWjWCng?utm_source=github&utm_medium=readme&utm_campaign=ordo) is a KLADDS splash page, built in the same workspace.
 
+ORDO is the working method behind the product, given away. If it saved you one afternoon of an agent redoing its
+own work, the thing that method was built to ship is where the rest of our time goes.
+
 **[Get KLADDS free →](https://app.kladds.com/?utm_source=github&utm_medium=readme&utm_campaign=ordo)** Free forever plan, no card.
 
 ## Credits
@@ -182,4 +242,4 @@ Built on ideas from Headroom (inbound compaction), TOON (format by shape), LLMLi
 work and Lost-in-the-Middle (why long windows decay), and Lojban (an unambiguous grammar). Their numbers are theirs;
 ours are measured here.
 
-MIT · [SprucetheAI](https://github.com/SprucetheAI)
+MIT · [SprucetheAI](https://github.com/SprucetheAI) · Built inside [KLADDS](https://app.kladds.com/?utm_source=github&utm_medium=readme&utm_campaign=ordo_footer), the last business app you'll ever need

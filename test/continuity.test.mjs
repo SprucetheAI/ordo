@@ -4,11 +4,11 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, readFileSync, existsSync, mkdirSync, utimesSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { handle, paths, readIntent, lastContext, recall, signals, isLong } from "../hooks/ordo-continuity.mjs";
+import { handle, paths, readIntent, lastContext, recall, signals, isLong, bands, clipMid } from "../hooks/ordo-continuity.mjs";
 import { classifyTask } from "../src/index.js";
 
 let dir;
-beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "ordo-cont-")); process.env.ORDO_HOME = dir; delete process.env.ORDO_BANDS; });
+beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "ordo-cont-")); process.env.ORDO_HOME = dir; for (const k of ["ORDO_BANDS", "ORDO_BIG_RESULT", "CLAUDE_CODE_AUTO_COMPACT_WINDOW"]) delete process.env[k]; });
 const sid = "s-test";
 const ctxOf = (out) => (out ? JSON.parse(out).hookSpecificOutput.additionalContext : "");
 const transcript = (tokens, extra = []) => {
@@ -52,6 +52,42 @@ test("context bands: each band nudges once, a fresh anchor silences it", () => {
   assert.equal(handle({ hook_event_name: "PostToolUse", session_id: sid, transcript_path: t }), "", "same band twice is noise");
   writeFileSync(paths(sid).anchor, "GOAL x");
   assert.equal(handle({ hook_event_name: "PostToolUse", session_id: sid, transcript_path: transcript(470000) }), "");
+});
+
+test("bands follow the compaction window; the last one warns before the cliff even with a fresh anchor", () => {
+  process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW = "400000";
+  assert.deepEqual(bands(), [160000, 260000, 340000]);
+  process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW = "400k";
+  assert.deepEqual(bands(), [160000, 260000, 340000]);
+  mkdirSync(paths(sid).dir, { recursive: true }); writeFileSync(paths(sid).anchor, "GOAL x");
+  assert.equal(handle({ hook_event_name: "PostToolUse", session_id: sid, transcript_path: transcript(200000) }), "", "fresh anchor, early band: silent");
+  const out = ctxOf(handle({ hook_event_name: "PostToolUse", session_id: sid, transcript_path: transcript(345000) }));
+  assert.match(out, /compaction fires near 367k/); assert.match(out, /start no new large read/);
+});
+
+test("a fat anchor comes back head and tail, never head only; the nudge says it has become a log", () => {
+  const fat = "GOAL: ship v4\n" + "DONE: step ".repeat(900) + "\nNEXT: write the README\nFAILED: approach A";
+  mkdirSync(paths(sid).dir, { recursive: true }); writeFileSync(paths(sid).anchor, fat);
+  const out = ctxOf(handle({ hook_event_name: "SessionStart", source: "compact", session_id: sid, cwd: dir }));
+  for (const must of ["GOAL: ship v4", "NEXT: write the README", "FAILED: approach A", "of the middle not shown"]) assert.ok(out.includes(must), must);
+  assert.ok(clipMid("x".repeat(9000), 3500).length <= 3500);
+  assert.match(ctxOf(handle({ hook_event_name: "PostToolUse", session_id: sid, transcript_path: transcript(320000) })), /cut it to state/);
+});
+
+test("one huge tool result gets one line, at most twice per window; small ones and subagents get none", () => {
+  const big = { hook_event_name: "PostToolUse", session_id: sid, tool_name: "Read", tool_response: "x".repeat(80000) };
+  assert.match(ctxOf(handle(big)), /Read result was ~20k tokens/);
+  assert.ok(handle(big)); assert.equal(handle(big), "", "third time is nagging");
+  assert.equal(handle({ ...big, session_id: "s2", tool_response: "small" }), "");
+  assert.equal(handle({ ...big, session_id: "s3", agent_id: "a1" }), "");
+});
+
+test("a subagent's compaction gets its own contract and writes no audit row", () => {
+  prompt("never push without asking");
+  const out = handle({ hook_event_name: "PreCompact", session_id: sid, agent_id: "a1", trigger: "auto" });
+  assert.match(out, /subagent's window/); assert.ok(!out.includes("REQUESTS"));
+  handle({ hook_event_name: "PostCompact", session_id: sid, agent_id: "a1", compact_summary: "x" });
+  assert.ok(!existsSync(join(dir, "compactions.tsv")));
 });
 
 test("subagent tool calls never nudge (their context is disposable)", () => {
@@ -113,7 +149,7 @@ test("recall: verbatim and keyword measures behave", () => {
 test("SubagentStart: return contract plus the parent's goal line", () => {
   mkdirSync(paths(sid).dir, { recursive: true }); writeFileSync(paths(sid).anchor, "# A\nGOAL: ship ORDO v3 continuity\nPLAN\n1 x");
   const out = ctxOf(handle({ hook_event_name: "SubagentStart", session_id: sid, agent_id: "a1", agent_type: "Explore" }));
-  assert.match(out, /return contract/); assert.match(out, /ship ORDO v3 continuity/); assert.ok(!out.includes("1 x"));
+  assert.match(out, /return contract/); assert.match(out, /instead of guessing/); assert.match(out, /ship ORDO v3 continuity/); assert.ok(!out.includes("1 x"));
 });
 
 test("garbage in never throws", () => {
