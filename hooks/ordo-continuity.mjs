@@ -127,7 +127,8 @@ function bandNudge(p, ctx) {
 
 // One result this size is re-read on every later turn until the window is compacted. Say it at most twice per window.
 function bigNudge(p, inp) {
-  let size = 0; try { const r = inp.tool_response; size = typeof r === "string" ? r.length : JSON.stringify(r ?? "").length; } catch {}
+  // An image arrives as base64 and costs ~1.5k tokens whatever its byte size, so unbroken base64 runs do not count.
+  let size = 0; try { const r = inp.tool_response; size = (typeof r === "string" ? r : JSON.stringify(r ?? "")).replace(/[A-Za-z0-9+/=]{2000,}/g, "").length; } catch {}
   if (size < bigResult()) return "";
   const st = readJSON(p.state, {});
   if ((st.big || 0) >= 2) return "";

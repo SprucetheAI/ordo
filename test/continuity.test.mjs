@@ -75,9 +75,11 @@ test("a fat anchor comes back head and tail, never head only; the nudge says it 
 });
 
 test("one huge tool result gets one line, at most twice per window; small ones and subagents get none", () => {
-  const big = { hook_event_name: "PostToolUse", session_id: sid, tool_name: "Read", tool_response: "x".repeat(80000) };
+  const big = { hook_event_name: "PostToolUse", session_id: sid, tool_name: "Read", tool_response: "a line of code\n".repeat(5334) };
   assert.match(ctxOf(handle(big)), /Read result was ~20k tokens/);
   assert.ok(handle(big)); assert.equal(handle(big), "", "third time is nagging");
+  const image = { type: "image", file: { base64: "iVBORw0KGgo".repeat(12000) } };
+  assert.equal(handle({ ...big, session_id: "s4", tool_response: image }), "", "an image is ~1.5k tokens, not its base64 length");
   assert.equal(handle({ ...big, session_id: "s2", tool_response: "small" }), "");
   assert.equal(handle({ ...big, session_id: "s3", agent_id: "a1" }), "");
 });
