@@ -1,0 +1,58 @@
+{
+  "doc_id": "doc_f7155d8bab68",
+  "url": "https://app.kladds.com/by/linus/why-claude-code-forgets-what-you-told-it-and-the-fix",
+  "title": "Why Claude Code forgets what you told it, and the fix",
+  "summary": "I replayed 527 of my own compactions. Only 8 in 100 of my requests survived word for word. ORDO puts your words back after every compaction and cuts the tokens you re-read each turn. Free and open source.",
+  "keyword": "ORDO",
+  "stats": [
+    {
+      "label": "Compactions replayed",
+      "value": "527"
+    },
+    {
+      "label": "Your words kept verbatim",
+      "value": "8% → 54%"
+    },
+    {
+      "label": "Your rules kept",
+      "value": "37% → 58%"
+    },
+    {
+      "label": "Context tokens (modeled)",
+      "value": "−48%"
+    },
+    {
+      "label": "Cost per restore",
+      "value": "~2,300 tokens"
+    },
+    {
+      "label": "Price",
+      "value": "Free, MIT"
+    }
+  ],
+  "tabs": [
+    {
+      "file": "why-400k.md",
+      "title": "Why 400k, not 1M",
+      "slug": "why-400k",
+      "stats": [
+        {
+          "label": "Already there before you type",
+          "value": "124k"
+        },
+        {
+          "label": "A 400k window is swept at",
+          "value": "367k"
+        },
+        {
+          "label": "Room in between",
+          "value": "~240k"
+        },
+        {
+          "label": "Context tokens, modeled",
+          "value": "−48%"
+        }
+      ]
+    }
+  ]
+}
