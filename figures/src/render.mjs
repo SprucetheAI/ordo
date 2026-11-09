@@ -13,9 +13,11 @@ const chrome = process.argv[2] || process.env.CHROME || [
   '/usr/bin/google-chrome',
 ].find(existsSync);
 const page = pathToFileURL(join(here, 'figures.html')).href;
-const FIGS = { hero: 600, loop: 470, numbers: 500, kladds: 470 };
+const FIGS = { hero: 600, loop: 470, window: 690, numbers: 500, kladds: 470 };
+const only = (process.env.FIGS || '').split(',').filter(Boolean);   // FIGS=window,loop renders just those
 
 for (const [f, h] of Object.entries(FIGS)) {
+  if (only.length && !only.includes(f)) continue;
   for (const t of ['light', 'dark']) {
     const file = join(out, `${f}-${t}.png`);
     execFileSync(chrome, [
@@ -27,7 +29,7 @@ for (const [f, h] of Object.entries(FIGS)) {
 }
 
 // Share images: a 16:9 cover (2x) for the splash and blog cards, and the 1200x630 og:image crawlers fetch.
-for (const [name, w, h, dpr] of [['cover', 1200, 675, 2], ['og', 1200, 630, 1]]) {
+for (const [name, w, h, dpr] of only.length ? [] : [['cover', 1200, 675, 2], ['og', 1200, 630, 1]]) {
   const file = join(out, `${name}.png`);
   execFileSync(chrome, [
     '--headless=new', '--hide-scrollbars', `--force-device-scale-factor=${dpr}`,

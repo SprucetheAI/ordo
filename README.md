@@ -14,6 +14,7 @@
 <p align="center">
   <a href="#install">Install</a> ·
   <a href="#the-problem-measured">The problem</a> ·
+  <a href="#1m-is-the-size-of-the-desk-not-the-plan">Why 400k</a> ·
   <a href="#what-it-does">What it does</a> ·
   <a href="#how-a-session-runs">How a session runs</a> ·
   <a href="#fewer-invented-facts">Fewer invented facts</a> ·
@@ -50,11 +51,7 @@ Recommended with the hooks, if you run a 1M-context model: compact at 400k inste
 { "env": { "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "400000" } }
 ```
 
-Why 400k and not lower: a session is not empty when it starts. Ours measured 124k before the first tool call
-(system prompt, tool lists, CLAUDE.md, skill list), and Claude Code compacts about 33k under the window, so 400k
-leaves roughly 240k of working room, about one phase of real work. Go much lower and the session spends its time
-compacting; go much higher and every turn re-reads stale tool output. The cap is a backstop, not the strategy:
-what keeps paying is a smaller base, less inflow, and compactions that land on a phase boundary. ORDO's nudges
+Why 400k when the model holds 1M: [the desk, explained](#1m-is-the-size-of-the-desk-not-the-plan). ORDO's nudges
 follow whatever window you set (40%, 65%, 85% of it).
 
 Node 18+. Nothing leaves your machine: state lives in `~/.ordo/` (override with `ORDO_HOME`).
@@ -76,6 +73,32 @@ the window is finally compacted, the summary keeps less than half of what you as
 from a paraphrase. That reads as "it ignores my instructions" and "it forgot what we decided". It is not new: the
 numbers are the same before and after the November 3 thinking change people are posting about
 ([`docs/OPUS-NOV-3.md`](docs/OPUS-NOV-3.md) has that story with the billed-token data).
+
+## 1M is the size of the desk, not the plan
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="figures/window-dark.png">
+  <img src="figures/window-light.png" alt="The same 36 turns of work drawn twice. Left, the window is left to fill: each bar is what Claude re-reads before that step, and the bars climb toward 1M. Right, the window is compacted at 400k and the anchor is kept: the bars stay under 400k and the empty space above them is the saving. 124k is already there before you type, a 400k window is swept at 367k, leaving about 240k of room, roughly one phase of work. Modeled on 1,510 sessions: 47.9% fewer context tokens." width="100%">
+</picture>
+
+Think of the context window as a desk. A 1M-token model has a very big desk. But before every single step, Claude
+re-reads everything on that desk, and most of what piles up there is old tool output it will never need again. A
+fuller desk does not make it smarter. It makes every step a longer re-read, and it buries what you said under what
+a command printed two hours ago.
+
+So ORDO works at 400k. When the desk is about 40% covered it gets swept, and the two things that matter go
+straight back on it: the anchor (goal, plan, decisions, what failed) and your own words. You keep the big desk.
+You stop re-reading the pile.
+
+| Question | Answer |
+|---|---|
+| Is 400k too small for a 1M model? | No. 1M is what it *can* hold; you pay, in tokens and in attention, for what it *does* hold, on every turn |
+| Then why not 200k? | A session is not empty when it starts. Ours measured 124k before the first tool call (system prompt, tool lists, CLAUDE.md, skill list), and Claude Code sweeps about 33k under the window. 400k leaves ~240k of room, about one phase of real work. Much lower and the session spends its time sweeping |
+| When is a bigger window right? | When one thing has to be held whole: a very large single file or log, or one chain of reasoning that cannot be split into phases. Raise it for that session, then go back |
+| And without ORDO's hooks? | Then a sweep costs you your own words (8% survive verbatim), and a bigger window is the safer default. The restore is what makes sweeping early cheap |
+
+The picture is an illustration: both sides get the same inflow per turn. The 47.9% is modeled on the 1,510 real
+sessions (`python tools/continuity_scan.py --window 400000`), not drawn from the picture.
 
 ## What it does
 

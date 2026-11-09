@@ -1,8 +1,9 @@
 <!doctype html>
 <!--
   ORDO README figures, in the KLADDS landing kit (paper, ink, one green, one coral; Newsreader, Shantell Sans,
-  JetBrains Mono, Inter). One page draws one figure: ?f=hero|loop|numbers|kladds&t=light|dark.
-  Render all eight PNGs with: node figures/src/render.mjs   (needs Chrome; fonts load from Google Fonts, OFL)
+  JetBrains Mono, Inter). One page draws one figure: ?f=hero|loop|window|numbers|kladds&t=light|dark.
+  Render every PNG with: node figures/src/render.mjs   (needs Chrome; fonts load from Google Fonts, OFL)
+  Render some: FIGS=window,loop node figures/src/render.mjs
   Every number drawn here is in README.md with the script that produced it.
 -->
 <html lang="en">
@@ -96,6 +97,26 @@
   .legend { position: absolute; left: 64px; right: 64px; bottom: 34px; display: flex; gap: 28px; font: 500 14px/1 var(--mono); color: var(--muted); }
   .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 8px; }
 
+  /* window: the same work, drawn twice. Column height is what gets re-read on that turn. */
+  #window .sheet { height: 690px; }
+  #window h2 { font-size: 44px; line-height: 1.04; }
+  .desks { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .desk { position: relative; background: var(--card); border-radius: 18px; box-shadow: var(--lift); padding: 22px 24px 20px; }
+  .desk h3 { font: 600 21px/1.15 var(--sans); letter-spacing: -0.01em; }
+  .desk h3 small { display: block; margin-top: 5px; font: 400 15px/1.3 var(--sans); color: var(--muted); }
+  .plot { position: relative; margin-top: 18px; height: 250px; display: flex; align-items: flex-end; gap: 3px; border-bottom: 1.5px solid var(--hair); }
+  .plot i { flex: 1; border-radius: 3px 3px 0 0; background: var(--faint); }
+  .desk.ordo .plot i { background: var(--green); }
+  .rule { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--hair); }
+  .rule span { position: absolute; right: 0; bottom: 4px; font: 500 13px/1 var(--mono); color: var(--faint); background: var(--card); padding-left: 8px; }
+  .desk .note { font-size: 20px; }
+  .desk.ordo .note { color: var(--green); }
+  .facts { margin-top: 26px; display: grid; grid-template-columns: repeat(3, auto) 1fr; gap: 34px; align-items: baseline; }
+  .fact b { font: 600 30px/1 var(--mono); letter-spacing: -0.03em; }
+  .fact span { display: block; margin-top: 6px; font-size: 15px; line-height: 1.3; color: var(--muted); }
+  .facts .src { text-align: right; font: 500 14px/1.5 var(--mono); color: var(--muted); }
+  .facts .src b { color: var(--green); font-weight: 600; }
+
   /* kladds */
   #kladds .sheet { height: 470px; display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
   .blob { position: absolute; width: 520px; height: 520px; border-radius: 50%; background: var(--sage); right: -120px; bottom: -260px; }
@@ -148,7 +169,7 @@
       <svg class="arrow" viewBox="0 0 26 14"><path d="M1 7 H23 M17 1 L24 7 L17 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <div class="step"><div class="k">02</div><h3>The anchor</h3><p>On a long task the model writes <code>anchor.md</code>: goal in your words, plan, decisions, what failed.</p>
       <svg class="arrow" viewBox="0 0 26 14"><path d="M1 7 H23 M17 1 L24 7 L17 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="step"><div class="k">03</div><h3>Context fills</h3><p>One nudge per band, 150k to 750k, to bring the anchor up to date.</p>
+    <div class="step"><div class="k">03</div><h3>Context fills</h3><p>One nudge at 40, 65 and 85% of the window, to bring the anchor up to date.</p>
       <svg class="arrow" viewBox="0 0 26 14"><path d="M1 7 H23 M17 1 L24 7 L17 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <div class="step cut"><div class="k">04</div><h3>Compaction</h3><p>The window is thrown away. The summary alone keeps under half your words.</p>
       <svg class="arrow" viewBox="0 0 26 14"><path d="M1 7 H23 M17 1 L24 7 L17 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -176,6 +197,26 @@
       <div class="delta hand">+24</div></div>
   </div>
   <div class="legend"><span><i style="background:var(--faint)"></i>summary alone</span><span><i style="background:var(--green)"></i>summary + ORDO</span><span style="margin-left:auto">node tools/continuity_replay.mjs</span></div>
+</div></section>
+
+<!-- WINDOW -->
+<section class="fig" id="window"><div class="sheet">
+  <h2>1M is how much it can hold.<br><em>You pay for what it holds, every turn.</em></h2>
+  <p class="sub">The same 36 turns of work, drawn twice. Each bar is what Claude re-reads before that step.</p>
+  <div class="desks">
+    <div class="desk"><h3>Let the window fill<small>nothing is swept, so old tool output is re-read forever</small></h3>
+      <div class="plot" id="pa"><div class="rule" style="bottom:100%"><span>1M · what it can hold</span></div></div>
+      <div class="note hand" style="left: 30px; top: 150px; transform: rotate(-3deg);">all of this, again,<br>on every single turn</div></div>
+    <div class="desk ordo"><h3>Compact at 400k, keep the anchor<small>sweep the desk, put back your words and the plan</small></h3>
+      <div class="plot" id="pb"><div class="rule" style="bottom:100%"><span>1M</span></div><div class="rule" style="bottom:40%"><span>400k</span></div></div>
+      <div class="note hand" style="right: 26px; top: 112px; transform: rotate(2deg);">the empty part<br>is the saving</div></div>
+  </div>
+  <div class="facts">
+    <div class="fact"><b>124k</b><span>already on the desk<br>before you type</span></div>
+    <div class="fact"><b>367k</b><span>where a 400k window<br>is swept</span></div>
+    <div class="fact"><b>~240k</b><span>room in between:<br>about one phase of work</span></div>
+    <div class="src"><b>−47.9% context tokens</b>, modeled on 1,510 sessions<br>python tools/continuity_scan.py --window 400000</div>
+  </div>
 </div></section>
 
 <!-- KLADDS -->
@@ -216,6 +257,18 @@
   for (const [id, keep] of [['ga', keepA], ['gb', keepB]]) {
     const g = document.getElementById(id);
     if (g) for (let i = 0; i < 100; i++) { const c = document.createElement('span'); if (keep.has(i)) c.className = 'k'; g.append(c); }
+  }
+  // Window figure: both panels get the same inflow per turn (an illustration, ~23k a turn with a little jitter).
+  // Left never sweeps. Right is swept at 367k and restarts from the base plus the anchor and the restore (~130k).
+  const pa = document.getElementById('pa'), pb = document.getElementById('pb');
+  if (pa && pb) {
+    let a = 124, b = 124;
+    for (let t = 0; t < 36; t++) {
+      const add = 23 * (0.7 + rnd() * 0.6);
+      a = Math.min(a + add, 967); b += add;
+      if (b >= 367) b = 130;
+      for (const [plot, v] of [[pa, a], [pb, b]]) { const bar = document.createElement('i'); bar.style.height = (v / 10) + '%'; plot.append(bar); }
+    }
   }
 </script>
 </body>
